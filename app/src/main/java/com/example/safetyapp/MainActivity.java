@@ -1,6 +1,7 @@
 package com.example.safetyapp;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -65,6 +66,15 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         if (mAuth.getCurrentUser() == null) {
             redirectToLogin();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent serviceIntent = new Intent(this, EmergencyTriggerService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
         }
     }
 }
