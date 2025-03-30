@@ -48,10 +48,15 @@ public class EmergencyTriggerService extends Service
                 .build();
     }
 
-
     @Override
     public IBinder onBind(Intent intent) {
         return null;
 
+    }
+
+    private void triggerEmergency() {
+        Intent intent = new Intent(this, EmergencyActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }
