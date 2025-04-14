@@ -30,6 +30,12 @@ public class MainActivity extends AppCompatActivity {
         {
             startActivity(new Intent(MainActivity.this, EmergencyContactsActivity.class));
         });
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForegroundService(new Intent(this, ShakeDetector.class));
+        } else {
+            startService(new Intent(this, ShakeDetector.class));
+        }
     }
 
     // Inflate the menu
@@ -72,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Intent serviceIntent = new Intent(this, EmergencyTriggerService.class);
+        Intent serviceIntent = new Intent(this, ShakeDetector.class);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent);
         }

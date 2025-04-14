@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
@@ -41,9 +41,11 @@
             android:label="Emergency Settings"
             android:parentActivityName=".MainActivity"/>
 
-        <service android:name=".EmergencyTriggerService"
+        <service android:name=".ShakeDetector"
             android:enabled="true"
-            android:exported="false"/>
+            android:exported="false"
+            android:foregroundServiceType="location"
+            tools:targetApi="s"/>
 
     </application>
 </manifest>
