@@ -48,6 +48,8 @@ dependencies {
     implementation ("androidx.browser:browser:1.5.0")
     implementation ("com.facebook.android:facebook-android-sdk:latest_version")
     implementation ("com.google.firebase:firebase-auth:latest_version")
+    implementation ("org.tensorflow:tensorflow-lite:2.14.0")
+    implementation ("org.tensorflow:tensorflow-lite-select-tf-ops:2.14.0")
 
 
 }

@@ -1,8 +1,16 @@
 [versions]
+activity = "1.10.1"
 agp = "8.7.3"
 appcompat = "1.7.0"
+blurry = "4.0.0"
+browser = "1.5.0"
 constraintlayout = "2.1.4"
+facebookAndroidSdk = "16.3.0"
+facebookAndroidSdkVersion = "16.3.0"
+firebaseAuth = "23.2.1"
+firebaseAuthVersion = "23.2.1"
 firebaseBom = "33.10.0"
+firebaseDatabase = "21.0.0"
 kotlin = "2.0.0"
 coreKtx = "1.10.1"
 junit = "4.13.2"
@@ -12,14 +20,30 @@ lifecycleRuntimeKtx = "2.6.1"
 activityCompose = "1.10.1"
 composeBom = "2024.04.01"
 material = "1.12.0"
+materialVersion = "1.9.0"
+playServicesAuth = "21.3.0"
+playServicesLocation = "21.3.0"
+playServicesMaps = "19.2.0"
+tarsosdsp = "2.4"
+tensorflowLite = "2.13.0"
+tensorflowLiteSupport = "0.4.3"
+litert = "1.4.0"
 
 [libraries]
+androidx-activity = { module = "androidx.activity:activity", version.ref = "activity" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+blurry = { module = "jp.wasabeef:blurry", version.ref = "blurry" }
+facebook-android-sdk = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookAndroidSdk" }
+facebook-android-sdk-vlatestversion = { module = "com.facebook.android:facebook-android-sdk", version.ref = "facebookAndroidSdkVersion" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
+firebase-auth-vlatestversion = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuthVersion" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-database = { module = "com.google.firebase:firebase-database", version.ref = "firebaseDatabase" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }
+google-firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -34,6 +58,14 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
+material-v190 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
+play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+tarsosdsp = { module = "com.github.JorenSix:TarsosDSP", version.ref = "tarsosdsp" }
+tensorflow-lite = { module = "org.tensorflow:tensorflow-lite", version.ref = "tensorflowLite" }
+tensorflow-lite-support = { module = "org.tensorflow:tensorflow-lite-support", version.ref = "tensorflowLiteSupport" }
+litert = { group = "com.google.ai.edge.litert", name = "litert", version.ref = "litert" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
