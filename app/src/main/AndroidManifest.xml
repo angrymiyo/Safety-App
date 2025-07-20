@@ -25,7 +25,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -101,6 +100,7 @@
         <activity android:name=".AIVoiceActivity" android:label="AIVoiceActivity Settings" android:parentActivityName=".MainActivity" />
         <activity android:name=".PopupCountdownActivity" android:theme="@style/Theme.AppCompat.Dialog" />
         <activity android:name=".SettingsActivity" android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+        <activity android:name=".VoiceEnrollmentActivity" />
 
         <!-- Broadcast receiver -->
         <receiver android:name=".PowerButtonReceiver" android:exported="false"/>

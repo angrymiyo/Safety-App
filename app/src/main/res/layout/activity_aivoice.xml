@@ -1,25 +1,60 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center">
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="@android:color/white">
 
+    <!-- Status indicator -->
     <TextView
         android:id="@+id/tv_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Initializing voice detection..."
+        android:text="Listening for shouts..."
         android:textSize="18sp"
+        android:textColor="@color/Deep_Navy"
         android:gravity="center"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp" />
 
+    <!-- Processing indicator -->
     <ProgressBar
         android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyleHorizontal"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:indeterminate="true" />
+
+    <!-- Detection status -->
+    <TextView
+        android:id="@+id/tv_detection_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:indeterminate="true"/>
+        android:text="Detection active"
+        android:textSize="16sp"
+        android:textColor="@color/Deep_Navy"
+        android:gravity="center"
+        android:layout_marginBottom="32dp" />
 
+    <!-- Enrollment button -->
+    <Button
+        android:id="@+id/btn_enroll_voice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enroll/Update Voice"
+        android:backgroundTint="@color/Teal_200"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Enrollment status -->
+    <TextView
+        android:id="@+id/tv_enroll_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Voice enrolled: Yes"
+        android:textColor="@color/Deep_Navy"
+        android:textSize="14sp"
+        android:layout_marginTop="8dp" />
 </LinearLayout>

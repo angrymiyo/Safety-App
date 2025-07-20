@@ -1,0 +1,54 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@android:color/white">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Emergency Shout Enrollment"
+        android:textSize="20sp"
+        android:textColor="@color/Deep_Navy"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Instruction -->
+    <TextView
+        android:id="@+id/tv_enroll_instruction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Shout loudly when prompted to create your emergency voice signature"
+        android:textSize="16sp"
+        android:textColor="@color/Deep_Navy"
+        android:gravity="center"
+        android:layout_marginBottom="32dp" />
+
+    <!-- Status display -->
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ready to start..."
+        android:textSize="24sp"
+        android:textColor="@color/Teal_200"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="32dp"
+        android:padding="16dp"
+        android:background="@drawable/rounded_bg_light"/>
+
+    <!-- Enrollment button -->
+    <Button
+        android:id="@+id/btn_start_enrollment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Enrollment"
+        android:textSize="16sp"
+        android:backgroundTint="@color/Teal_200"
+        android:textColor="@android:color/white" />
+</LinearLayout>
