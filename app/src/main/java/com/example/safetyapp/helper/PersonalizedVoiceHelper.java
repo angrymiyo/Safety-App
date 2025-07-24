@@ -200,6 +200,39 @@ public class PersonalizedVoiceHelper {
         }
     }
 
+    public boolean matchVoice(short[] audioData) {
+        // Load stored embedding if not loaded yet
+        if (storedEmbedding == null) {
+            if (!loadStoredEmbedding()) {
+                Log.e(TAG, "No stored embedding for matching");
+                return false;
+            }
+        }
+
+        // Check RMS loudness
+        float rms = calculateRMS(audioData);
+        if (rms < MIN_VERIFY_RMS) {
+            Log.d(TAG, "Audio too quiet for matching (RMS: " + rms + ")");
+            return false;
+        }
+
+        // Convert short[] PCM to float[] PCM normalized for YAMNet
+        float[] floatAudio = new float[audioData.length];
+        for (int i = 0; i < audioData.length; i++) {
+            floatAudio[i] = audioData[i] / 32768.0f;
+        }
+
+        // Run YAMNet on current audio
+        float[] liveEmbedding = runYamnet(floatAudio);
+        if (liveEmbedding == null) {
+            Log.e(TAG, "Failed to get live embedding for matching");
+            return false;
+        }
+
+        // Verify similarity
+        return verify(liveEmbedding, audioData);
+    }
+
     // ==== Reset ====
     public boolean clearSavedEmbedding() {
         File file = new File(context.getFilesDir(), EMBEDDING_FILE);

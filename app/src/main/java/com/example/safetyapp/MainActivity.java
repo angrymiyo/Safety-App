@@ -48,6 +48,7 @@ public class MainActivity extends BaseActivity {
 
     private static final int REQ_NOTIFICATION_PERMISSION = 999;
     private static final int REQ_SMS_PERMISSION = 1001;
+    private static final int REQ_MIC_PERMISSION = 1002;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -89,7 +90,7 @@ public class MainActivity extends BaseActivity {
 
         requestNotificationPermission();
         requestSMSPermission();
-
+        requestMicrophonePermission();
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
@@ -239,6 +240,13 @@ public class MainActivity extends BaseActivity {
             Toast.makeText(this, "Notification permission granted", Toast.LENGTH_SHORT).show();
         } else if (requestCode == REQ_SMS_PERMISSION && (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED)) {
             Toast.makeText(this, "SMS permission denied. Shake SOS won't work.", Toast.LENGTH_LONG).show();
+        }else if (requestCode == REQ_MIC_PERMISSION && (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED)) {
+            Toast.makeText(this, "Mic permission denied. Voice detection won't work.", Toast.LENGTH_LONG).show();
+        }
+    }
+    private void requestMicrophonePermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQ_MIC_PERMISSION);
         }
     }
 }

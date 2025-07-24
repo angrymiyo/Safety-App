@@ -1,60 +1,68 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_aivoice_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="24dp"
-    android:gravity="center"
-    android:background="@android:color/white">
+    android:background="@android:color/white"
+    tools:context=".AIVoiceActivity">
 
-    <!-- Status indicator -->
+    <!-- Title or header -->
+    <TextView
+        android:id="@+id/tv_toolbar_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Voice Detection"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:paddingBottom="16dp" />
+
+    <!-- Status Text -->
     <TextView
         android:id="@+id/tv_status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Listening for shouts..."
-        android:textSize="18sp"
-        android:textColor="@color/Deep_Navy"
+        android:text="Initializing..."
+        android:textSize="16sp"
+        android:textColor="#333"
+        android:layout_below="@id/tv_toolbar_title"
+        android:layout_marginTop="20dp"
         android:gravity="center"
-        android:layout_marginBottom="16dp" />
+        android:padding="12dp"
+        android:background="@drawable/status_bg"/>
 
-    <!-- Processing indicator -->
+    <!-- Progress bar showing active listening -->
     <ProgressBar
         android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="80dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
-        android:indeterminate="true" />
-
-    <!-- Detection status -->
-    <TextView
-        android:id="@+id/tv_detection_status"
+        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Detection active"
-        android:textSize="16sp"
-        android:textColor="@color/Deep_Navy"
-        android:gravity="center"
-        android:layout_marginBottom="32dp" />
+        android:layout_height="8dp"
+        android:layout_below="@id/tv_status"
+        android:layout_marginTop="20dp"
+        android:indeterminate="true"
+        android:visibility="visible"
+        android:progressTint="@color/Teal_200"/>
 
-    <!-- Enrollment button -->
+    <!-- Enroll Voice Button -->
     <Button
         android:id="@+id/btn_enroll_voice"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Enroll/Update Voice"
-        android:backgroundTint="@color/Teal_200"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        android:layout_marginBottom="12dp" />
-
-    <!-- Enrollment status -->
-    <TextView
-        android:id="@+id/tv_enroll_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Voice enrolled: Yes"
-        android:textColor="@color/Deep_Navy"
-        android:textSize="14sp"
-        android:layout_marginTop="8dp" />
-</LinearLayout>
+        android:text="Enroll Personalized Voice"
+        android:layout_below="@id/progress_bar"
+        android:layout_marginTop="40dp"
+        android:layout_centerHorizontal="true"
+        android:backgroundTint="@color/Muted_Teal"
+        android:textColor="@android:color/white"
+        android:paddingLeft="24dp"
+        android:paddingRight="24dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:elevation="4dp"/>
+
+</RelativeLayout>

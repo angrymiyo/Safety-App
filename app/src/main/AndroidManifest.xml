@@ -3,7 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Optional device feature -->
-    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -20,19 +22,23 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/icon"
-        android:roundIcon="@drawable/icon"
         android:label="@string/app_name"
+        android:roundIcon="@drawable/icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.SafetyApp"
         tools:targetApi="31">
@@ -43,21 +49,21 @@
             android:value="@string/facebook_app_id" />
         <meta-data
             android:name="com.facebook.sdk.ClientToken"
-            android:value="@string/facebook_client_token" />
-
-        <!-- Facebook Activities -->
+            android:value="@string/facebook_client_token" /> <!-- Facebook Activities -->
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:label="@string/app_name"
-            android:exported="true" />
+            android:exported="true"
+            android:label="@string/app_name" />
         <activity
             android:name="com.facebook.CustomTabActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
@@ -77,6 +83,7 @@
             android:authorities="com.facebook.app.FacebookContentProvider607874032340277"
             android:exported="false"
             android:grantUriPermissions="true" />
+
         <!-- App launcher -->
         <activity
             android:name=".SplashActivity"
@@ -84,28 +91,66 @@
             android:theme="@style/Theme.SafetyApp">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <!-- Main and other screens -->
         <activity android:name=".MainActivity" />
-        <activity android:name=".ProfileActivity" android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".ProfileActivity"
+            android:parentActivityName=".MainActivity" />
         <activity android:name=".LiveLocation" />
         <activity android:name=".SignupActivity" />
         <activity android:name=".LoginActivity" />
-        <activity android:name=".SafeZoneActivity" android:label="SafeZoneActivity" android:parentActivityName=".MainActivity" />
-        <activity android:name=".SaveSMSActivity" android:label="Sms Settings" android:parentActivityName=".MainActivity" />
-        <activity android:name=".InCaseEmergencyActivity" android:label="InCaseEmergencyActivity Settings" android:parentActivityName=".MainActivity" />
-        <activity android:name=".AIVoiceActivity" android:label="AIVoiceActivity Settings" android:parentActivityName=".MainActivity" />
-        <activity android:name=".PopupCountdownActivity" android:theme="@style/Theme.AppCompat.Dialog" />
-        <activity android:name=".SettingsActivity" android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
+        <activity
+            android:name=".SafeZoneActivity"
+            android:label="SafeZoneActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".SaveSMSActivity"
+            android:label="Sms Settings"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".InCaseEmergencyActivity"
+            android:label="InCaseEmergencyActivity Settings"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".AIVoiceActivity"
+            android:label="AIVoiceActivity Settings"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".PopupCountdownActivity"
+            android:theme="@style/Theme.AppCompat.Dialog" />
+        <activity
+            android:name=".SettingsActivity"
+            android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
         <activity android:name=".VoiceEnrollmentActivity" />
 
         <!-- Broadcast receiver -->
-        <receiver android:name=".PowerButtonReceiver" android:exported="false"/>
+        <receiver
+            android:name=".PowerButtonReceiver"
+            android:exported="false" />
+        <receiver
+            android:name=".BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
 
         <!-- Service -->
+        <service
+            android:name="com.example.safetyapp.service.VoiceDetectionService"
+            android:foregroundServiceType="microphone"
+            android:exported="false" />
+        <service
+            android:name=".service.VoiceMonitorService"
+            android:foregroundServiceType="microphone"
+            android:exported="false" />
 
     </application>
+
 </manifest>

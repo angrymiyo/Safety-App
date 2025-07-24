@@ -1,6 +1,7 @@
 package com.example.safetyapp;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -72,9 +73,25 @@ public class SettingsActivity extends BaseActivity {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.RECORD_AUDIO},
                         REQ_RECORD_AUDIO_PERMISSION);
+                return;
             }
+
             prefs.edit().putBoolean("voice_detection", isChecked).apply();
+
+            Intent serviceIntent = new Intent(this, com.example.safetyapp.service.VoiceDetectionService.class);
+
+
+            if (isChecked) {
+                // Start the voice monitor service in foreground
+                ContextCompat.startForegroundService(this, serviceIntent);
+                Toast.makeText(this, "Voice detection enabled", Toast.LENGTH_SHORT).show();
+            } else {
+                // Stop the service if the switch is turned off
+                stopService(serviceIntent);
+                Toast.makeText(this, "Voice detection disabled", Toast.LENGTH_SHORT).show();
+            }
         });
+
 
         // Power button press count spinner (existing)
         int savedCount = prefs.getInt("power_press_count", 3);

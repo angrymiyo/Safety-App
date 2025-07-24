@@ -81,7 +81,6 @@ public class AIVoiceActivity extends BaseActivity {
         tvStatus = findViewById(R.id.tv_status);
         progressBar = findViewById(R.id.progress_bar);
         Button enrollButton = findViewById(R.id.btn_enroll_voice);
-        TextView enrollStatus = findViewById(R.id.tv_enroll_status);
 
         // click listener for enrollment button
         enrollButton.setOnClickListener(v -> {

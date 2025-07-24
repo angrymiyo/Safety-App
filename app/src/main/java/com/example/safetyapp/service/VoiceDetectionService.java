@@ -1,0 +1,339 @@
+package com.example.safetyapp.service;
+
+import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.Service;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.media.AudioFormat;
+import android.media.AudioRecord;
+import android.media.MediaRecorder;
+import android.os.Build;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.PowerManager;
+import android.util.Log;
+import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+
+import com.example.safetyapp.R;
+import com.example.safetyapp.helper.EmergencyMessageHelperService;
+import com.example.safetyapp.helper.PersonalizedVoiceHelper;
+
+import org.tensorflow.lite.Interpreter;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.HashMap;
+import java.util.Map;
+
+public class VoiceDetectionService extends Service {
+
+    private static final String TAG = "VoiceDetectionService";
+
+    private static final int NOTIFICATION_ID = 1;
+    private static final String CHANNEL_ID = "VoiceDetectionChannel";
+
+    private static final int SAMPLE_RATE = 16000;
+    private static final int RECORD_DURATION_MS = 975;
+    private static final int BUFFER_SIZE = SAMPLE_RATE * RECORD_DURATION_MS / 1000;
+
+    private static final float SCREAM_THRESHOLD = 0.8f;
+    private static final float MIN_VERIFY_RMS = 0.08f;
+    private static final int CONSECUTIVE_POSITIVES_REQUIRED = 3;
+    private static final long COOLDOWN_MS = 30_000;
+
+    private AudioRecord audioRecord;
+    private boolean isRecording = false;
+
+    private Interpreter yamnetInterpreter;
+    private Interpreter screamClassifierInterpreter;
+    private PersonalizedVoiceHelper voiceHelper;
+
+    private short[] audioBuffer = new short[BUFFER_SIZE];
+    private Handler mainHandler;
+
+    private int positiveCount = 0;
+    private boolean isInCooldown = false;
+
+    private PowerManager.WakeLock wakeLock;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mainHandler = new Handler(Looper.getMainLooper());
+
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SafetyApp::VoiceDetectionWakelock");
+
+        createNotificationChannel();
+        startForeground(NOTIFICATION_ID, buildNotification("Voice detection starting..."));
+
+        // Load models asynchronously, then start recording
+        loadModels();
+    }
+
+    private void loadModels() {
+        new Thread(() -> {
+            try {
+                yamnetInterpreter = new Interpreter(loadModelFromAssets("yamnet.tflite"));
+                screamClassifierInterpreter = new Interpreter(loadModelFromAssets("scream_classifier.tflite"));
+                voiceHelper = new PersonalizedVoiceHelper(getApplicationContext(), yamnetInterpreter);
+                boolean embeddingLoaded = voiceHelper.loadStoredEmbedding();
+                Log.i(TAG, "Models loaded. Embedding loaded: " + embeddingLoaded);
+
+                mainHandler.post(() -> {
+                    startForeground(NOTIFICATION_ID, buildNotification("Voice detection running"));
+                    startAudioRecording();
+                });
+
+            } catch (IOException e) {
+                Log.e(TAG, "Error loading models", e);
+                stopSelf();
+            }
+        }).start();
+    }
+
+    private ByteBuffer loadModelFromAssets(String filename) throws IOException {
+        InputStream inputStream = getAssets().open(filename);
+        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int length;
+        while ((length = inputStream.read(buffer)) != -1) {
+            byteBuffer.write(buffer, 0, length);
+        }
+        byte[] modelBytes = byteBuffer.toByteArray();
+
+        ByteBuffer byteBufferModel = ByteBuffer.allocateDirect(modelBytes.length);
+        byteBufferModel.order(ByteOrder.nativeOrder());
+        byteBufferModel.put(modelBytes);
+        byteBufferModel.rewind();
+        return byteBufferModel;
+    }
+
+    private void startAudioRecording() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Microphone permission not granted");
+            stopSelf();
+            return;
+        }
+
+        int minBufferSize = AudioRecord.getMinBufferSize(
+                SAMPLE_RATE,
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT
+        );
+
+        audioRecord = new AudioRecord(
+                MediaRecorder.AudioSource.MIC,
+                SAMPLE_RATE,
+                AudioFormat.CHANNEL_IN_MONO,
+                AudioFormat.ENCODING_PCM_16BIT,
+                Math.max(minBufferSize, BUFFER_SIZE * 2)
+        );
+
+        if (audioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
+            Log.e(TAG, "AudioRecord initialization failed");
+            stopSelf();
+            return;
+        }
+
+        isRecording = true;
+
+        // Acquire WakeLock to keep CPU running
+        if (!wakeLock.isHeld()) {
+            wakeLock.acquire(COOLDOWN_MS);
+            Log.i(TAG, "WakeLock acquired");
+        }
+
+        new Thread(() -> {
+            audioRecord.startRecording();
+            while (isRecording) {
+                if (!isInCooldown) {
+                    int read = audioRecord.read(audioBuffer, 0, audioBuffer.length);
+                    if (read > 0) {
+                        processAudioChunk(audioBuffer);
+                    }
+                }
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    Log.e(TAG, "Sleep interrupted", e);
+                }
+            }
+            audioRecord.stop();
+            audioRecord.release();
+
+            // Release WakeLock on stop
+            if (wakeLock.isHeld()) {
+                wakeLock.release();
+                Log.i(TAG, "WakeLock released");
+            }
+        }).start();
+    }
+
+    private void processAudioChunk(short[] audioData) {
+        if (yamnetInterpreter == null || screamClassifierInterpreter == null || voiceHelper == null) return;
+
+        float rms = PersonalizedVoiceHelper.calculateRMS(audioData);
+        if (rms < MIN_VERIFY_RMS) {
+            Log.d(TAG, "Audio too quiet for verification (RMS: " + rms + ")");
+            return;
+        }
+
+        float[] floatInput = new float[audioData.length];
+        for (int i = 0; i < audioData.length; i++) {
+            floatInput[i] = audioData[i] / 32767f;
+        }
+
+        Object[] inputs = new Object[]{floatInput};
+        Map<Integer, Object> outputs = new HashMap<>();
+        float[][] yamnetScores = new float[1][521];
+        outputs.put(0, yamnetScores);
+
+        try {
+            yamnetInterpreter.runForMultipleInputsOutputs(inputs, outputs);
+        } catch (Exception e) {
+            Log.e(TAG, "YAMNet inference failed", e);
+            return;
+        }
+
+        float[] liveEmbedding = yamnetScores[0];
+
+        if (!voiceHelper.hasStoredEmbedding()) {
+            Log.d(TAG, "No stored user embedding; skipping verification");
+            return;
+        }
+
+        boolean verified = voiceHelper.verify(liveEmbedding, audioData);
+        if (!verified) {
+            Log.d(TAG, "Voice verification failed");
+            return;
+        }
+        Log.d(TAG, "Voice verified");
+
+        float[][] classifierInput = new float[1][521];
+        classifierInput[0] = liveEmbedding;
+
+        float screamProb;
+        try {
+            float[][] screamOutput = new float[1][1];
+            screamClassifierInterpreter.run(classifierInput, screamOutput);
+            screamProb = screamOutput[0][0];
+        } catch (Exception e) {
+            Log.e(TAG, "Scream classifier failed", e);
+            return;
+        }
+
+        Log.d(TAG, "Scream probability: " + screamProb);
+
+        if (screamProb > SCREAM_THRESHOLD) {
+            positiveCount++;
+            Log.d(TAG, "Positive scream count: " + positiveCount);
+
+            if (positiveCount >= CONSECUTIVE_POSITIVES_REQUIRED) {
+                Log.i(TAG, "Scream detected - triggering emergency");
+                positiveCount = 0;
+                mainHandler.post(this::triggerEmergency);
+            }
+        } else {
+            positiveCount = Math.max(0, positiveCount - 1);
+        }
+    }
+
+    private void triggerEmergency() {
+        if (isInCooldown) {
+            Log.d(TAG, "In cooldown; ignoring trigger");
+            return;
+        }
+
+        isInCooldown = true;
+        mainHandler.postDelayed(() -> {
+            isInCooldown = false;
+            Log.i(TAG, "Cooldown ended");
+        }, COOLDOWN_MS);
+
+        if (!wakeLock.isHeld()) {
+            wakeLock.acquire(COOLDOWN_MS);
+            Log.i(TAG, "WakeLock acquired for emergency");
+        }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.e(TAG, "Missing SMS or Location permissions - cannot send emergency message");
+            return;
+        }
+
+        try {
+            EmergencyMessageHelperService.sendEmergencyMessages(getApplicationContext(), "Automated emergency triggered by scream detection");
+
+            mainHandler.post(() -> Toast.makeText(getApplicationContext(), "Scream detected! Emergency SMS sent.", Toast.LENGTH_LONG).show());
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to send emergency SMS", e);
+        }
+    }
+
+    private Notification buildNotification(String contentText) {
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("নির্ভয় Safety App")
+                .setContentText(contentText)
+                .setSmallIcon(R.drawable.ic_sos) // Use your app's SOS icon here
+                .setOngoing(true)
+                .build();
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Voice Detection Service",
+                    NotificationManager.IMPORTANCE_LOW
+            );
+            channel.setDescription("Foreground service for voice scream detection");
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+            }
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        isRecording = false;
+
+        if (audioRecord != null) {
+            audioRecord.stop();
+            audioRecord.release();
+            audioRecord = null;
+        }
+        if (yamnetInterpreter != null) {
+            yamnetInterpreter.close();
+            yamnetInterpreter = null;
+        }
+        if (screamClassifierInterpreter != null) {
+            screamClassifierInterpreter.close();
+            screamClassifierInterpreter = null;
+        }
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
+            Log.i(TAG, "WakeLock released on destroy");
+        }
+        Log.i(TAG, "Service destroyed");
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null; // Not a bound service
+    }
+}
