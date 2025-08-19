@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
-    android:background="@android:color/white"
+    android:background="@color/Light_Sky_Blue"
     tools:context=".AIVoiceActivity">
 
     <!-- Title or header -->
@@ -17,7 +17,7 @@
         android:text="Voice Detection"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="@android:color/black"
+        android:textColor="@color/Deep_Navy"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:paddingBottom="16dp" />
@@ -29,12 +29,12 @@
         android:layout_height="wrap_content"
         android:text="Initializing..."
         android:textSize="16sp"
-        android:textColor="#333"
-        android:layout_below="@id/tv_toolbar_title"
-        android:layout_marginTop="20dp"
+        android:textColor="@color/Deep_Navy"
         android:gravity="center"
         android:padding="12dp"
-        android:background="@drawable/status_bg"/>
+        android:background="@android:color/white"
+        android:layout_below="@id/tv_toolbar_title"
+        android:layout_marginTop="20dp" />
 
     <!-- Progress bar showing active listening -->
     <ProgressBar
@@ -46,7 +46,7 @@
         android:layout_marginTop="20dp"
         android:indeterminate="true"
         android:visibility="visible"
-        android:progressTint="@color/Teal_200"/>
+        android:progressTint="@color/Deep_Navy"/>
 
     <!-- Enroll Voice Button -->
     <Button
@@ -54,10 +54,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Enroll Personalized Voice"
+        android:textSize="16sp"
         android:layout_below="@id/progress_bar"
         android:layout_marginTop="40dp"
         android:layout_centerHorizontal="true"
-        android:backgroundTint="@color/Muted_Teal"
+        android:backgroundTint="@color/Deep_Navy"
         android:textColor="@android:color/white"
         android:paddingLeft="24dp"
         android:paddingRight="24dp"
