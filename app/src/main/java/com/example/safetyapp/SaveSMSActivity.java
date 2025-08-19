@@ -47,7 +47,7 @@ public class SaveSMSActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupLayout(R.layout.activity_save_sms, "Emergency Contacts & Save SMS", true,R.id.nav_home);
+        setupLayout(R.layout.activity_save_sms, " Emergency Contacts & SMS", true,R.id.nav_home);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
@@ -69,17 +69,23 @@ public class SaveSMSActivity extends BaseActivity {
 
         rvContacts.setLayoutManager(new LinearLayoutManager(this));
         adapter = new ContactsAdapter(contacts, this::deleteContact, this::editContact);
-//        adapter = new ContactsAdapter(contacts, this::deleteContact);
         rvContacts.setAdapter(adapter);
 
         loadEmergencyContacts();
         loadSavedMessage();
 
+        // Spinner setup with black text and white dropdown background
         String[] countdownOptions = {"5 sec", "10 sec", "30 sec", "Send Immediately"};
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, countdownOptions);
-        spinnerCountdown.setAdapter(spinnerAdapter);
-        btnAddContact.setOnClickListener(this::showContactOptionsMenu);
 
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
+                this,
+                R.layout.spinner_item, // selected item black text
+                countdownOptions
+        );
+        spinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item); // dropdown black text + white bg
+        spinnerCountdown.setAdapter(spinnerAdapter);
+
+        btnAddContact.setOnClickListener(this::showContactOptionsMenu);
 
         btnSaveMessage.setOnClickListener(v -> {
             String message = etEmergencyMessage.getText().toString().trim();
@@ -108,7 +114,6 @@ public class SaveSMSActivity extends BaseActivity {
                     .addOnSuccessListener(unused -> Toast.makeText(this, "Message & Countdown saved", Toast.LENGTH_SHORT).show())
                     .addOnFailureListener(e -> Toast.makeText(this, "Failed to save data", Toast.LENGTH_SHORT).show());
         });
-
     }
 
     private void loadSavedMessage() {
@@ -191,8 +196,6 @@ public class SaveSMSActivity extends BaseActivity {
 
     private void addContact(Contact contact) {
         String phone = contact.getPhone().trim();
-
-        // Add +880 if missing
         if (!phone.startsWith("+")) {
             if (phone.startsWith("0")) {
                 phone = "+880" + phone.substring(1);
@@ -200,9 +203,7 @@ public class SaveSMSActivity extends BaseActivity {
                 phone = "+880" + phone;
             }
         }
-
         contact.setPhone(phone);
-
         dbRef.push().setValue(contact)
                 .addOnSuccessListener(unused -> Toast.makeText(this, "Contact added!", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(this, "Failed to add contact", Toast.LENGTH_SHORT).show());

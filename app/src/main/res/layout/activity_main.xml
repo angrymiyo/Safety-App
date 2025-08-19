@@ -107,7 +107,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center"
-                        android:text="Save SMS and Emargency Cotacts"
+                        android:text="Emergency Contacts &amp; SMS"
                         android:textColor="@color/white"
                         android:textSize="10sp"
                         android:textStyle="bold" />
