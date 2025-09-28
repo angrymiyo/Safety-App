@@ -6,8 +6,11 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.telephony.SmsManager;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,14 +18,23 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.*;
 
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class LiveLocation extends BaseActivity {
 
@@ -32,9 +44,18 @@ public class LiveLocation extends BaseActivity {
     private FusedLocationProviderClient fusedLocationProviderClient;
     private List<Contact> contacts = new ArrayList<>();
     private DatabaseReference dbRef;
+    private DatabaseReference liveLocationRef;
     private FirebaseUser currentUser;
 
     private Button btnShare;
+    private Button btnStopSharing;
+    private TextView tvStatus;
+
+    private LocationRequest locationRequest;
+    private LocationCallback locationCallback;
+    private Handler handler;
+    private String shareId;
+    private boolean isSharing = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +64,10 @@ public class LiveLocation extends BaseActivity {
 //        setContentView(R.layout.activity_live_location);
 
         btnShare = findViewById(R.id.btnShareLocation);
+        btnStopSharing = findViewById(R.id.btnStopSharing);
+        tvStatus = findViewById(R.id.tvStatus);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        handler = new Handler(Looper.getMainLooper());
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
@@ -55,7 +79,11 @@ public class LiveLocation extends BaseActivity {
         dbRef = FirebaseDatabase.getInstance().getReference("Users")
                 .child(currentUser.getUid()).child("emergencyContacts");
 
+        liveLocationRef = FirebaseDatabase.getInstance().getReference("LiveLocations");
+
         loadContacts();
+        setupLocationRequest();
+        setupLocationCallback();
 
         btnShare.setOnClickListener(v -> {
             if (contacts.isEmpty()) {
@@ -64,12 +92,15 @@ public class LiveLocation extends BaseActivity {
             }
 
             new AlertDialog.Builder(this)
-                    .setTitle("Share Location")
-                    .setMessage("Do you want to share your location via WhatsApp or SMS?")
-                    .setPositiveButton("WhatsApp", (dialog, which) -> shareLocation("whatsapp"))
-                    .setNegativeButton("SMS", (dialog, which) -> shareLocation("sms"))
+                    .setTitle("Share Live Location")
+                    .setMessage("Start sharing your real-time location? Recipients will see your live movement on a map.")
+                    .setPositiveButton("WhatsApp", (dialog, which) -> startLiveLocationSharing("whatsapp"))
+                    .setNegativeButton("SMS", (dialog, which) -> startLiveLocationSharing("sms"))
+                    .setNeutralButton("Cancel", null)
                     .show();
         });
+
+        btnStopSharing.setOnClickListener(v -> stopLiveLocationSharing());
     }
 
     private void loadContacts() {
@@ -92,7 +123,30 @@ public class LiveLocation extends BaseActivity {
         });
     }
 
-    private void shareLocation(String method) {
+    private void setupLocationRequest() {
+        locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000) // Update every 10 seconds
+                .setWaitForAccurateLocation(false)
+                .setMinUpdateIntervalMillis(5000) // Minimum 5 seconds between updates
+                .setMaxUpdateDelayMillis(15000) // Maximum 15 seconds delay
+                .build();
+    }
+
+    private void setupLocationCallback() {
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null || !isSharing) {
+                    return;
+                }
+
+                for (Location location : locationResult.getLocations()) {
+                    updateLiveLocation(location);
+                }
+            }
+        };
+    }
+
+    private void startLiveLocationSharing(String method) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -110,27 +164,83 @@ public class LiveLocation extends BaseActivity {
             return;
         }
 
-        fusedLocationProviderClient.getLastLocation()
-                .addOnSuccessListener(location -> {
-                    if (location != null) {
-                        String message = createLocationMessage(location);
-                        for (Contact contact : contacts) {
-                            if ("whatsapp".equals(method)) {
-                                sendWhatsApp(contact.getPhone(), message);
-                            } else {
-                                sendSmsDirectly(contact.getPhone(), message);
-                            }
-                        }
-                    } else {
-                        Toast.makeText(this, "Location not available", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        // Generate unique share ID
+        shareId = currentUser.getUid() + "_" + System.currentTimeMillis();
+        isSharing = true;
+
+        // Start location updates
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+
+        // Create live location session
+        createLiveLocationSession();
+
+        // Send live location link to contacts
+        String liveLocationUrl = "https://your-domain.com/live-location/" + shareId; // You'll need to host this
+        String message = "🚨 LIVE LOCATION SHARING 🚨\n\nI'm sharing my real-time location with you. Click to see my live movement:\n\n" + liveLocationUrl + "\n\nThis link will work for 1 hour.";
+
+        for (Contact contact : contacts) {
+            if ("whatsapp".equals(method)) {
+                sendWhatsApp(contact.getPhone(), message);
+            } else {
+                sendSmsDirectly(contact.getPhone(), message);
+            }
+        }
+
+        // Update UI
+        btnShare.setEnabled(false);
+        btnStopSharing.setEnabled(true);
+        tvStatus.setText("🔴 LIVE: Sharing real-time location...");
+        Toast.makeText(this, "Started sharing live location!", Toast.LENGTH_SHORT).show();
+
+        // Auto-stop after 1 hour
+        handler.postDelayed(this::stopLiveLocationSharing, 3600000); // 1 hour
     }
 
-    private String createLocationMessage(Location location) {
-        double lat = location.getLatitude();
-        double lng = location.getLongitude();
-        return "Here is my location: https://www.google.com/maps?q=" + lat + "," + lng;
+    private void createLiveLocationSession() {
+        Map<String, Object> sessionData = new HashMap<>();
+        sessionData.put("userId", currentUser.getUid());
+        sessionData.put("userEmail", currentUser.getEmail());
+        sessionData.put("startTime", System.currentTimeMillis());
+        sessionData.put("isActive", true);
+
+        liveLocationRef.child(shareId).setValue(sessionData);
+    }
+
+    private void updateLiveLocation(Location location) {
+        if (shareId == null || !isSharing) return;
+
+        Map<String, Object> locationData = new HashMap<>();
+        locationData.put("latitude", location.getLatitude());
+        locationData.put("longitude", location.getLongitude());
+        locationData.put("accuracy", location.getAccuracy());
+        locationData.put("timestamp", System.currentTimeMillis());
+        locationData.put("speed", location.hasSpeed() ? location.getSpeed() : 0);
+
+        liveLocationRef.child(shareId).child("currentLocation").setValue(locationData);
+
+        // Update status
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+        tvStatus.setText("🔴 LIVE: Location updated at " + sdf.format(new Date()));
+    }
+
+    private void stopLiveLocationSharing() {
+        if (!isSharing) return;
+
+        isSharing = false;
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        handler.removeCallbacksAndMessages(null);
+
+        // Mark session as inactive
+        if (shareId != null) {
+            liveLocationRef.child(shareId).child("isActive").setValue(false);
+            liveLocationRef.child(shareId).child("endTime").setValue(System.currentTimeMillis());
+        }
+
+        // Update UI
+        btnShare.setEnabled(true);
+        btnStopSharing.setEnabled(false);
+        tvStatus.setText("Live location sharing stopped");
+        Toast.makeText(this, "Stopped sharing live location", Toast.LENGTH_SHORT).show();
     }
 
     private void sendWhatsApp(String phoneNumber, String message) {
@@ -157,6 +267,18 @@ public class LiveLocation extends BaseActivity {
             Toast.makeText(this, "Failed to send SMS to " + phoneNumber, Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopLiveLocationSharing();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Continue sharing in background - don't stop here
     }
 
     @Override

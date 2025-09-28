@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Location Sharing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .status {
+            background: #4CAF50;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .status.offline {
+            background: #f44336;
+        }
+
+        #map {
+            width: 100%;
+            height: 70vh;
+            border: none;
+        }
+
+        .info-panel {
+            background: white;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚨 Live Location Sharing</h1>
+        <p>Real-time location tracking</p>
+    </div>
+
+    <div id="status" class="status">
+        🔴 LIVE - Location updates active
+    </div>
+
+    <div id="loading" class="loading">
+        📍 Loading live location data...
+    </div>
+
+    <div id="error" class="error" style="display: none;">
+        ❌ Unable to load location data. The sharing session may have expired.
+    </div>
+
+    <iframe id="map" style="display: none;" frameborder="0"></iframe>
+
+    <div class="info-panel" id="info" style="display: none;">
+        <h3>📊 Location Information</h3>
+        <div class="info-item">
+            <span>📍 Last Update:</span>
+            <span id="lastUpdate">-</span>
+        </div>
+        <div class="info-item">
+            <span>🎯 Accuracy:</span>
+            <span id="accuracy">-</span>
+        </div>
+        <div class="info-item">
+            <span>🏃 Speed:</span>
+            <span id="speed">-</span>
+        </div>
+        <div class="info-item">
+            <span>⏱️ Session Started:</span>
+            <span id="startTime">-</span>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+        import { getDatabase, ref, onValue, off } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
+
+        // Firebase configuration (you'll need to replace with your config)
+        const firebaseConfig = {
+            // Your Firebase config here
+            apiKey: "your-api-key",
+            authDomain: "your-project.firebaseapp.com",
+            databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+            projectId: "your-project-id"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Get share ID from URL
+        const shareId = window.location.pathname.split('/').pop() || new URLSearchParams(window.location.search).get('id');
+
+        if (!shareId) {
+            showError('Invalid sharing link');
+            return;
+        }
+
+        let currentLat, currentLng;
+        let locationRef;
+
+        function initializeTracking() {
+            locationRef = ref(database, `LiveLocations/${shareId}`);
+
+            onValue(locationRef, (snapshot) => {
+                const data = snapshot.val();
+
+                if (!data) {
+                    showError('Sharing session not found or has expired');
+                    return;
+                }
+
+                if (!data.isActive) {
+                    document.getElementById('status').className = 'status offline';
+                    document.getElementById('status').textContent = '🔴 OFFLINE - Location sharing has ended';
+                    return;
+                }
+
+                if (data.currentLocation) {
+                    updateLocation(data.currentLocation);
+                    updateSessionInfo(data);
+                    showMap();
+                }
+            });
+        }
+
+        function updateLocation(location) {
+            currentLat = location.latitude;
+            currentLng = location.longitude;
+
+            // Update map
+            const mapUrl = `https://www.google.com/maps/embed/v1/view?key=YOUR_GOOGLE_MAPS_API_KEY&center=${currentLat},${currentLng}&zoom=16&maptype=roadmap`;
+            document.getElementById('map').src = mapUrl;
+
+            // Update info panel
+            document.getElementById('lastUpdate').textContent = new Date(location.timestamp).toLocaleTimeString();
+            document.getElementById('accuracy').textContent = Math.round(location.accuracy) + ' meters';
+            document.getElementById('speed').textContent = location.speed ? (location.speed * 3.6).toFixed(1) + ' km/h' : '0 km/h';
+
+            // Hide loading
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function updateSessionInfo(data) {
+            if (data.startTime) {
+                document.getElementById('startTime').textContent = new Date(data.startTime).toLocaleString();
+            }
+        }
+
+        function showMap() {
+            document.getElementById('map').style.display = 'block';
+            document.getElementById('info').style.display = 'block';
+        }
+
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').textContent = '❌ ' + message;
+            document.getElementById('error').style.display = 'block';
+        }
+
+        // Start tracking
+        initializeTracking();
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (locationRef) {
+                off(locationRef);
+            }
+        });
+    </script>
+</body>
+</html>

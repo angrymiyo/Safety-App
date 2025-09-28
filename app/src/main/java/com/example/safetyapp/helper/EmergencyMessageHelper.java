@@ -141,6 +141,50 @@ public class EmergencyMessageHelper {
         }
     }
 
+    public void sendSOSMessage(String method, String customMessage) {
+        Toast.makeText(activity, "Starting SOS message via " + method, Toast.LENGTH_SHORT).show();
+
+        if ("sms".equals(method) && ContextCompat.checkSelfPermission(activity, Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(activity, "SMS permission not granted", Toast.LENGTH_LONG).show();
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS}, SMS_PERMISSION_CODE);
+            return;
+        }
+
+        userRef.child("emergencyContacts").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                contacts.clear();
+                for (DataSnapshot contactSnapshot : snapshot.getChildren()) {
+                    Contact contact = contactSnapshot.getValue(Contact.class);
+                    if (contact != null) {
+                        contacts.add(contact);
+                    }
+                }
+
+                Toast.makeText(activity, "Found " + contacts.size() + " emergency contacts", Toast.LENGTH_SHORT).show();
+
+                if (contacts.isEmpty()) {
+                    Toast.makeText(activity, "No emergency contacts found. Please add contacts first.", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                for (Contact contact : contacts) {
+                    if ("sms".equals(method)) {
+                        sendSms(contact.getPhone(), customMessage);
+                    } else if ("whatsapp".equals(method)) {
+                        sendWhatsApp(contact.getPhone(), customMessage);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                Toast.makeText(activity, "Failed to load contacts: " + error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     public void sendCustomMessage(String method, String customMessage) {
         if ("sms".equals(method) && ContextCompat.checkSelfPermission(activity, Manifest.permission.SEND_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -167,12 +211,12 @@ public class EmergencyMessageHelper {
                 for (Contact contact : contacts) {
                     if ("sms".equals(method)) {
                         sendSms(contact.getPhone(), customMessage);
-                    } else {
+                    } else if ("whatsapp".equals(method)) {
                         sendWhatsApp(contact.getPhone(), customMessage);
                     }
                 }
 
-                postToFacebookFeed(customMessage);
+                // Don't post to Facebook for SOS custom messages
             }
 
             @Override

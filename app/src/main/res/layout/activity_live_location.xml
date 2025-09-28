@@ -43,20 +43,53 @@
         android:textColor="@color/Muted_Teal"
         android:gravity="center" />
 
-    <!-- Share Location Button with Rounded Corners and Shadow -->
+    <!-- Status Text -->
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_below="@id/txtDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_centerHorizontal="true"
+        android:text="Ready to share live location"
+        android:textSize="14sp"
+        android:textColor="@color/Muted_Teal"
+        android:gravity="center"
+        android:padding="8dp"
+        android:background="@android:color/white" />
+
+    <!-- Share Location Button -->
     <Button
         android:id="@+id/btnShareLocation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="100dp"
+        android:layout_below="@id/tvStatus"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="16dp"
         android:backgroundTint="@color/Deep_Navy"
         android:drawablePadding="12dp"
         android:elevation="4dp"
         android:fontFamily="sans-serif-medium"
         android:padding="16dp"
-        android:text="Share My Live Location"
+        android:text="📍 Start Live Location Sharing"
         android:textColor="@android:color/white"
         android:textSize="18sp" />
+
+    <!-- Stop Sharing Button -->
+    <Button
+        android:id="@+id/btnStopSharing"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnShareLocation"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="100dp"
+        android:backgroundTint="@android:color/holo_red_dark"
+        android:drawablePadding="12dp"
+        android:elevation="4dp"
+        android:fontFamily="sans-serif-medium"
+        android:padding="16dp"
+        android:text="🛑 Stop Sharing"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:enabled="false" />
 </RelativeLayout>
