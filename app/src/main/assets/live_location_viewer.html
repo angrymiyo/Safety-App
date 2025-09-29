@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Location Sharing</title>
+    <!-- Leaflet CSS for OpenStreetMap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         * {
             margin: 0;
@@ -39,7 +41,37 @@
         #map {
             width: 100%;
             height: 70vh;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1;
+        }
+
+        .map-controls {
+            background: white;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .map-button {
+            background: #667eea;
+            color: white;
             border: none;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .map-button:hover {
+            background: #5a6fd8;
+        }
+
+        .map-button.active {
+            background: #4CAF50;
         }
 
         .info-panel {
@@ -93,7 +125,15 @@
         ❌ Unable to load location data. The sharing session may have expired.
     </div>
 
-    <iframe id="map" style="display: none;" frameborder="0"></iframe>
+    <div class="map-controls" id="mapControls" style="display: none;">
+        <h4>🗺️ Map View Options (FREE - No API Key Required)</h4>
+        <button class="map-button active" id="satelliteBtn" onclick="changeMapType('satellite')">📡 Satellite (Exact Place)</button>
+        <button class="map-button" id="streetBtn" onclick="changeMapType('street')">🛣️ Street Map</button>
+        <button class="map-button" id="terrainBtn" onclick="changeMapType('terrain')">🏔️ Terrain</button>
+        <button class="map-button" id="trailBtn" onclick="toggleMovementTrail()">🛤️ Movement Trail</button>
+    </div>
+
+    <div id="map" style="display: none;"></div>
 
     <div class="info-panel" id="info" style="display: none;">
         <h3>📊 Location Information</h3>
@@ -114,6 +154,9 @@
             <span id="startTime">-</span>
         </div>
     </div>
+
+    <!-- Leaflet JavaScript for OpenStreetMap -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script type="module">
         // Import Firebase modules
@@ -141,10 +184,67 @@
             return;
         }
 
+        // OpenStreetMap variables
+        let map;
+        let currentMarker;
+        let movementTrail = [];
+        let trailPolyline;
         let currentLat, currentLng;
         let locationRef;
+        let currentMapType = 'satellite';
+        let previousLat, previousLng;
+        let showTrail = false;
+
+        // Map layer definitions (FREE - No API key required!)
+        const mapLayers = {
+            satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Esri, DigitalGlobe, GeoEye, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AeroGRID, IGN, and the GIS User Community',
+                maxZoom: 19
+            }),
+            street: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
+            }),
+            terrain: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap (CC-BY-SA)',
+                maxZoom: 17
+            })
+        };
+
+        function initializeMap() {
+            // Initialize map with high zoom for exact location
+            map = L.map('map').setView([0, 0], 18);
+
+            // Add default satellite layer
+            mapLayers.satellite.addTo(map);
+
+            // Create custom marker icon for live location
+            const liveIcon = L.divIcon({
+                className: 'live-marker',
+                html: `<div style="
+                    width: 20px; height: 20px;
+                    background: #ff0000;
+                    border: 3px solid white;
+                    border-radius: 50%;
+                    box-shadow: 0 0 10px rgba(255,0,0,0.5);
+                    animation: pulse 2s infinite;
+                "></div>
+                <style>
+                @keyframes pulse {
+                    0% { box-shadow: 0 0 10px rgba(255,0,0,0.5); }
+                    50% { box-shadow: 0 0 20px rgba(255,0,0,1), 0 0 30px rgba(255,0,0,0.5); }
+                    100% { box-shadow: 0 0 10px rgba(255,0,0,0.5); }
+                }
+                </style>`,
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+
+            return liveIcon;
+        }
 
         function initializeTracking() {
+            const liveIcon = initializeMap();
             locationRef = ref(database, `LiveLocations/${shareId}`);
 
             onValue(locationRef, (snapshot) => {
@@ -162,28 +262,204 @@
                 }
 
                 if (data.currentLocation) {
-                    updateLocation(data.currentLocation);
+                    updateLocation(data.currentLocation, liveIcon);
                     updateSessionInfo(data);
                     showMap();
                 }
             });
         }
 
-        function updateLocation(location) {
+        function updateLocation(location, liveIcon) {
+            // Store previous location for movement detection and trail
+            if (currentLat && currentLng) {
+                previousLat = currentLat;
+                previousLng = currentLng;
+
+                // Add to movement trail
+                movementTrail.push([currentLat, currentLng]);
+            }
+
             currentLat = location.latitude;
             currentLng = location.longitude;
 
-            // Update map
-            const mapUrl = `https://www.google.com/maps/embed/v1/view?key=YOUR_GOOGLE_MAPS_API_KEY&center=${currentLat},${currentLng}&zoom=16&maptype=roadmap`;
-            document.getElementById('map').src = mapUrl;
+            // Update or create marker with smooth animation
+            if (currentMarker) {
+                // Smooth marker movement animation
+                currentMarker.setLatLng([currentLat, currentLng]);
+            } else {
+                // Create new marker
+                currentMarker = L.marker([currentLat, currentLng], {
+                    icon: liveIcon,
+                    title: 'Live Location - Real-time position'
+                }).addTo(map);
 
-            // Update info panel
+                // Add popup with live info
+                currentMarker.bindPopup(`
+                    <div style="text-align: center;">
+                        <h4>🔴 LIVE LOCATION</h4>
+                        <p><strong>Real-time Position</strong></p>
+                        <p>Accuracy: ±${Math.round(location.accuracy)}m</p>
+                        <p><small>${new Date(location.timestamp).toLocaleTimeString()}</small></p>
+                    </div>
+                `).openPopup();
+            }
+
+            // Update movement trail if enabled
+            if (showTrail && movementTrail.length > 1) {
+                if (trailPolyline) {
+                    map.removeLayer(trailPolyline);
+                }
+                trailPolyline = L.polyline(movementTrail, {
+                    color: '#ff0000',
+                    weight: 3,
+                    opacity: 0.7,
+                    dashArray: '5, 10'
+                }).addTo(map);
+            }
+
+            // Smooth map pan to new location (no jarring jumps)
+            map.panTo([currentLat, currentLng], {
+                animate: true,
+                duration: 1.0 // 1 second smooth transition
+            });
+
+            // Auto-zoom to appropriate level based on movement
+            const currentZoom = map.getZoom();
+            let targetZoom = currentMapType === 'satellite' ? 18 : 16;
+
+            if (location.speed && location.speed > 10) { // Moving fast (car/bus)
+                targetZoom = 15;
+            } else if (location.speed && location.speed > 2) { // Walking/cycling
+                targetZoom = 17;
+            }
+
+            if (Math.abs(currentZoom - targetZoom) > 1) {
+                map.setZoom(targetZoom);
+            }
+
+            // Update info panel with precise coordinates
             document.getElementById('lastUpdate').textContent = new Date(location.timestamp).toLocaleTimeString();
-            document.getElementById('accuracy').textContent = Math.round(location.accuracy) + ' meters';
+            document.getElementById('accuracy').textContent = `±${Math.round(location.accuracy)}m`;
             document.getElementById('speed').textContent = location.speed ? (location.speed * 3.6).toFixed(1) + ' km/h' : '0 km/h';
+
+            // Add coordinates display
+            if (!document.getElementById('coordinates')) {
+                const coordDiv = document.createElement('div');
+                coordDiv.className = 'info-item';
+                coordDiv.innerHTML = `
+                    <span>🗺️ Coordinates:</span>
+                    <span id="coordinates">-</span>
+                `;
+                document.getElementById('info').appendChild(coordDiv);
+            }
+            document.getElementById('coordinates').textContent = `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
+
+            // Add movement indicator
+            if (!document.getElementById('movement')) {
+                const movDiv = document.createElement('div');
+                movDiv.className = 'info-item';
+                movDiv.innerHTML = `
+                    <span>🏃 Movement:</span>
+                    <span id="movement">-</span>
+                `;
+                document.getElementById('info').appendChild(movDiv);
+            }
+
+            // Calculate movement
+            if (previousLat && previousLng) {
+                const distance = calculateDistance(previousLat, previousLng, currentLat, currentLng);
+                const movementText = distance > 0.001 ? `Moving (${(distance * 1000).toFixed(1)}m)` : 'Stationary';
+                document.getElementById('movement').textContent = movementText;
+
+                // Update status indicator based on movement
+                if (distance > 0.001) {
+                    document.getElementById('status').innerHTML = '🔴 LIVE - Person is moving';
+                    // Update marker popup for movement
+                    currentMarker.getPopup().setContent(`
+                        <div style="text-align: center;">
+                            <h4>🔴 LIVE LOCATION</h4>
+                            <p><strong>🏃 MOVING</strong></p>
+                            <p>Speed: ${location.speed ? (location.speed * 3.6).toFixed(1) : '0'} km/h</p>
+                            <p>Accuracy: ±${Math.round(location.accuracy)}m</p>
+                            <p><small>${new Date(location.timestamp).toLocaleTimeString()}</small></p>
+                        </div>
+                    `);
+                } else {
+                    document.getElementById('status').innerHTML = '🟡 LIVE - Person is stationary';
+                    currentMarker.getPopup().setContent(`
+                        <div style="text-align: center;">
+                            <h4>🟡 LIVE LOCATION</h4>
+                            <p><strong>📍 STATIONARY</strong></p>
+                            <p>Accuracy: ±${Math.round(location.accuracy)}m</p>
+                            <p><small>${new Date(location.timestamp).toLocaleTimeString()}</small></p>
+                        </div>
+                    `);
+                }
+            }
 
             // Hide loading
             document.getElementById('loading').style.display = 'none';
+        }
+
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; // Distance in km
+        }
+
+        window.changeMapType = function(mapType) {
+            if (!map) return;
+
+            currentMapType = mapType;
+
+            // Remove current layer
+            map.eachLayer(function(layer) {
+                if (layer instanceof L.TileLayer) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // Add new layer
+            mapLayers[mapType].addTo(map);
+
+            // Update button states
+            document.querySelectorAll('.map-button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(mapType + 'Btn').classList.add('active');
+        }
+
+        window.toggleMovementTrail = function() {
+            showTrail = !showTrail;
+
+            const btn = document.getElementById('trailBtn');
+            if (showTrail) {
+                btn.classList.add('active');
+                btn.textContent = '🛤️ Trail ON';
+
+                // Show existing trail if available
+                if (movementTrail.length > 1) {
+                    if (trailPolyline) map.removeLayer(trailPolyline);
+                    trailPolyline = L.polyline(movementTrail, {
+                        color: '#ff0000',
+                        weight: 3,
+                        opacity: 0.7,
+                        dashArray: '5, 10'
+                    }).addTo(map);
+                }
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = '🛤️ Movement Trail';
+
+                // Hide trail
+                if (trailPolyline) {
+                    map.removeLayer(trailPolyline);
+                    trailPolyline = null;
+                }
+            }
         }
 
         function updateSessionInfo(data) {
@@ -193,6 +469,7 @@
         }
 
         function showMap() {
+            document.getElementById('mapControls').style.display = 'block';
             document.getElementById('map').style.display = 'block';
             document.getElementById('info').style.display = 'block';
         }

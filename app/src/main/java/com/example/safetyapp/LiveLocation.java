@@ -39,6 +39,7 @@ import java.util.Map;
 public class LiveLocation extends BaseActivity {
 
     private static final int LOCATION_PERMISSION_CODE = 101;
+    private static final int BACKGROUND_LOCATION_PERMISSION_CODE = 103;
     private static final int SMS_PERMISSION_CODE = 102;
 
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -124,10 +125,12 @@ public class LiveLocation extends BaseActivity {
     }
 
     private void setupLocationRequest() {
-        locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 10000) // Update every 10 seconds
-                .setWaitForAccurateLocation(false)
-                .setMinUpdateIntervalMillis(5000) // Minimum 5 seconds between updates
-                .setMaxUpdateDelayMillis(15000) // Maximum 15 seconds delay
+        locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 2000) // Update every 2 seconds for real-time tracking
+                .setWaitForAccurateLocation(true) // Wait for accurate location
+                .setMinUpdateIntervalMillis(1000) // Minimum 1 second between updates for smooth movement
+                .setMaxUpdateDelayMillis(3000) // Maximum 3 seconds delay for responsiveness
+                .setMinUpdateDistanceMeters(1.0f) // Update when moved at least 1 meter
+                .setDurationMillis(3600000) // Track for 1 hour max
                 .build();
     }
 
@@ -147,12 +150,24 @@ public class LiveLocation extends BaseActivity {
     }
 
     private void startLiveLocationSharing(String method) {
+        // Check for fine location permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     LOCATION_PERMISSION_CODE);
             return;
+        }
+
+        // Check for background location permission (Android 10+) for continuous tracking
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
+                        BACKGROUND_LOCATION_PERMISSION_CODE);
+                return;
+            }
         }
 
         if ("sms".equals(method) &&
@@ -209,18 +224,29 @@ public class LiveLocation extends BaseActivity {
     private void updateLiveLocation(Location location) {
         if (shareId == null || !isSharing) return;
 
+        // Only update if location is accurate enough (less than 10 meters accuracy)
+        if (location.getAccuracy() > 10.0f) {
+            return; // Skip inaccurate locations
+        }
+
         Map<String, Object> locationData = new HashMap<>();
         locationData.put("latitude", location.getLatitude());
         locationData.put("longitude", location.getLongitude());
         locationData.put("accuracy", location.getAccuracy());
         locationData.put("timestamp", System.currentTimeMillis());
         locationData.put("speed", location.hasSpeed() ? location.getSpeed() : 0);
+        locationData.put("bearing", location.hasBearing() ? location.getBearing() : 0);
+        locationData.put("altitude", location.hasAltitude() ? location.getAltitude() : 0);
+        locationData.put("provider", location.getProvider());
 
+        // Store location in path for movement tracking
         liveLocationRef.child(shareId).child("currentLocation").setValue(locationData);
+        liveLocationRef.child(shareId).child("locationHistory").push().setValue(locationData);
 
-        // Update status
+        // Update status with accuracy info
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
-        tvStatus.setText("🔴 LIVE: Location updated at " + sdf.format(new Date()));
+        String accuracyText = String.format("±%.1fm", location.getAccuracy());
+        tvStatus.setText("🔴 LIVE: Updated at " + sdf.format(new Date()) + " (" + accuracyText + ")");
     }
 
     private void stopLiveLocationSharing() {
@@ -284,11 +310,19 @@ public class LiveLocation extends BaseActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == LOCATION_PERMISSION_CODE || requestCode == SMS_PERMISSION_CODE) {
+        if (requestCode == LOCATION_PERMISSION_CODE || requestCode == BACKGROUND_LOCATION_PERMISSION_CODE || requestCode == SMS_PERMISSION_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Permission granted, tap the button again.", Toast.LENGTH_SHORT).show();
+                if (requestCode == BACKGROUND_LOCATION_PERMISSION_CODE) {
+                    Toast.makeText(this, "Background location permission granted. Your location will be tracked even when app is minimized.", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, "Permission granted, tap the button again.", Toast.LENGTH_SHORT).show();
+                }
             } else {
-                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                if (requestCode == BACKGROUND_LOCATION_PERMISSION_CODE) {
+                    Toast.makeText(this, "Background location permission is required for continuous tracking", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
