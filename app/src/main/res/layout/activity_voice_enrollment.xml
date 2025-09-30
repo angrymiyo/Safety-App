@@ -1,69 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    android:background="@color/Light_Sky_Blue">
+    android:background="@android:color/white"
+    android:fillViewport="true">
 
-    <!-- Title or header -->
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Emergency Shout Enrollment"
-        android:textSize="22sp"
-        android:textColor="@color/Deep_Navy"
-        android:textStyle="bold"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp" />
-
-    <!-- Instruction text -->
-    <TextView
-        android:id="@+id/tv_enroll_instruction"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Shout loudly when prompted to create your emergency voice signature"
-        android:textSize="16sp"
-        android:textColor="@android:color/black"
-        android:gravity="center"
-        android:layout_below="@id/tv_title"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="32dp" />
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center_horizontal">
 
-    <!-- Status display box -->
-    <TextView
-        android:id="@+id/tv_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Ready to start..."
-        android:textSize="24sp"
-        android:textColor="@color/blue"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:padding="16dp"
-        android:background="@drawable/rounded_bg_light"
-        android:layout_below="@id/tv_enroll_instruction"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="32dp" />
+        <!-- Header Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginBottom="32dp">
 
-    <!-- Start enrollment button -->
-    <Button
-        android:id="@+id/btn_start_enrollment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Start Enrollment"
-        android:textSize="16sp"
-        android:backgroundTint="@color/Deep_Navy"
-        android:textColor="@android:color/white"
-        android:paddingLeft="24dp"
-        android:paddingRight="24dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:elevation="4dp"
-        android:layout_below="@id/tv_status"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp" />
+            <!-- Icon/Logo -->
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/ic_sos"
+                android:tint="@color/Deep_Navy"
+                android:layout_marginBottom="16dp"/>
 
-</RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Voice Protection"
+                android:textSize="28sp"
+                android:textColor="@color/Deep_Navy"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Enroll Your Emergency Voice"
+                android:textSize="16sp"
+                android:textColor="#666666"
+                android:textStyle="normal" />
+        </LinearLayout>
+
+        <!-- Animated Microphone Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_microphone"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="32dp"
+            app:cardCornerRadius="100dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="#F0F4FF">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <!-- Pulse Effect Background -->
+                <View
+                    android:id="@+id/pulse_ring_1"
+                    android:layout_width="180dp"
+                    android:layout_height="180dp"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/circle_pulse"
+                    android:alpha="0"/>
+
+                <View
+                    android:id="@+id/pulse_ring_2"
+                    android:layout_width="160dp"
+                    android:layout_height="160dp"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/circle_pulse"
+                    android:alpha="0"/>
+
+                <!-- Microphone Icon -->
+                <ImageView
+                    android:id="@+id/img_microphone"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_centerInParent="true"
+                    android:src="@android:drawable/ic_btn_speak_now"
+                    android:tint="@color/Deep_Navy"/>
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Status Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp"
+                android:gravity="center">
+
+                <!-- Status Text -->
+                <TextView
+                    android:id="@+id/tv_enroll_instruction"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ready to enroll your voice"
+                    android:textSize="18sp"
+                    android:textColor="@color/Deep_Navy"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Audio Level Indicator -->
+                <LinearLayout
+                    android:id="@+id/audio_level_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Audio Level: "
+                        android:textSize="14sp"
+                        android:textColor="#666666"/>
+
+                    <ProgressBar
+                        android:id="@+id/progress_audio_level"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="0dp"
+                        android:layout_height="8dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:max="100"
+                        android:progress="0"
+                        android:progressTint="#4CAF50"/>
+
+                    <TextView
+                        android:id="@+id/tv_audio_percentage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0%"
+                        android:textSize="14sp"
+                        android:textColor="#666666"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <!-- Quality Indicator -->
+                <LinearLayout
+                    android:id="@+id/quality_indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="16dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Quality: "
+                        android:textSize="14sp"
+                        android:textColor="#666666"/>
+
+                    <TextView
+                        android:id="@+id/tv_quality_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Excellent"
+                        android:textSize="14sp"
+                        android:textColor="#4CAF50"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Start Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_start_enrollment"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Start Voice Enrollment"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:cornerRadius="30dp"
+            app:icon="@android:drawable/ic_btn_speak_now"
+            app:iconGravity="textStart"
+            app:backgroundTint="@color/Deep_Navy"
+            android:textColor="@android:color/white"
+            app:elevation="6dp"/>
+
+    </LinearLayout>
+</ScrollView>

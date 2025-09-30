@@ -1,69 +1,296 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_aivoice_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    android:background="@color/Light_Sky_Blue"
+    android:background="#F5F7FA"
+    android:fillViewport="true"
     tools:context=".AIVoiceActivity">
 
-    <!-- Title or header -->
-    <TextView
-        android:id="@+id/tv_toolbar_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Voice Detection"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="@color/Deep_Navy"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:paddingBottom="16dp" />
-
-    <!-- Status Text -->
-    <TextView
-        android:id="@+id/tv_status"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Initializing..."
-        android:textSize="16sp"
-        android:textColor="@color/Deep_Navy"
-        android:gravity="center"
-        android:padding="12dp"
-        android:background="@android:color/white"
-        android:layout_below="@id/tv_toolbar_title"
-        android:layout_marginTop="20dp" />
+        android:orientation="vertical"
+        android:padding="20dp">
 
-    <!-- Progress bar showing active listening -->
-    <ProgressBar
-        android:id="@+id/progress_bar"
-        style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_below="@id/tv_status"
-        android:layout_marginTop="20dp"
-        android:indeterminate="true"
-        android:visibility="visible"
-        android:progressTint="@color/Deep_Navy"/>
+        <!-- Header Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginBottom="24dp">
 
-    <!-- Enroll Voice Button -->
-    <Button
-        android:id="@+id/btn_enroll_voice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Enroll Personalized Voice"
-        android:textSize="16sp"
-        android:layout_below="@id/progress_bar"
-        android:layout_marginTop="40dp"
-        android:layout_centerHorizontal="true"
-        android:backgroundTint="@color/Deep_Navy"
-        android:textColor="@android:color/white"
-        android:paddingLeft="24dp"
-        android:paddingRight="24dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:elevation="4dp"/>
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_sos"
+                android:tint="#FF5252"
+                android:layout_marginBottom="12dp"/>
 
-</RelativeLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Voice Guardian"
+                android:textSize="28sp"
+                android:textColor="@color/Deep_Navy"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="24/7 Protection Active"
+                android:textSize="14sp"
+                android:textColor="#4CAF50"
+                android:textStyle="bold"/>
+        </LinearLayout>
+
+        <!-- Live Monitoring Status Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Status Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <View
+                        android:id="@+id/status_indicator"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:background="@drawable/circle_pulse"
+                        android:backgroundTint="#4CAF50"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Live Monitoring"
+                        android:textSize="18sp"
+                        android:textColor="@color/Deep_Navy"
+                        android:textStyle="bold"
+                        android:layout_marginStart="12dp"/>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_btn_speak_now"
+                        android:tint="@color/Deep_Navy"/>
+                </LinearLayout>
+
+                <!-- Status Text -->
+                <TextView
+                    android:id="@+id/tv_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Initializing voice detection..."
+                    android:textSize="15sp"
+                    android:textColor="#666666"
+                    android:layout_marginBottom="12dp"
+                    android:minHeight="48dp"
+                    android:gravity="center_vertical"/>
+
+                <!-- Audio Level Meter -->
+                <LinearLayout
+                    android:id="@+id/audio_meter_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Audio Level"
+                        android:textSize="12sp"
+                        android:textColor="#999999"
+                        android:layout_marginBottom="8dp"/>
+
+                    <ProgressBar
+                        android:id="@+id/progress_bar"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="6dp"
+                        android:indeterminate="false"
+                        android:max="100"
+                        android:progress="0"
+                        android:progressTint="#4CAF50"
+                        android:progressBackgroundTint="#E0E0E0"/>
+                </LinearLayout>
+
+                <!-- Detection Stats Grid -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="16dp"
+                    android:weightSum="3">
+
+                    <!-- Scream Probability -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/tv_scream_prob"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0%"
+                            android:textSize="20sp"
+                            android:textColor="@color/Deep_Navy"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Distress"
+                            android:textSize="11sp"
+                            android:textColor="#999999"/>
+                    </LinearLayout>
+
+                    <!-- Voice Match -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/tv_voice_match"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="—"
+                            android:textSize="20sp"
+                            android:textColor="@color/Deep_Navy"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Match"
+                            android:textSize="11sp"
+                            android:textColor="#999999"/>
+                    </LinearLayout>
+
+                    <!-- Detection Count -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/tv_detection_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0/2"
+                            android:textSize="20sp"
+                            android:textColor="@color/Deep_Navy"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Confirms"
+                            android:textSize="11sp"
+                            android:textColor="#999999"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Voice Enrollment Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#E3F2FD">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@android:drawable/ic_btn_speak_now"
+                        android:tint="#1976D2"
+                        android:layout_marginEnd="16dp"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Voice Enrollment"
+                            android:textSize="16sp"
+                            android:textColor="#1976D2"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="4dp"/>
+
+                        <TextView
+                            android:id="@+id/tv_enrollment_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Enroll your voice for personalized detection"
+                            android:textSize="13sp"
+                            android:textColor="#666666"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_enroll_voice"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="Enroll Voice Now"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="25dp"
+                    app:icon="@android:drawable/ic_btn_speak_now"
+                    app:iconGravity="textStart"
+                    app:backgroundTint="#1976D2"
+                    android:textColor="@android:color/white"
+                    android:layout_marginTop="16dp"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+</ScrollView>

@@ -12,7 +12,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,6 +73,11 @@ public class AIVoiceActivity extends BaseActivity {
     // UI elements
     private TextView tvStatus;
     private ProgressBar progressBar;
+    private TextView tvScreamProb;
+    private TextView tvVoiceMatch;
+    private TextView tvDetectionCount;
+    private TextView tvEnrollmentStatus;
+    private LinearLayout audioMeterContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +87,11 @@ public class AIVoiceActivity extends BaseActivity {
         // Initialize UI
         tvStatus = findViewById(R.id.tv_status);
         progressBar = findViewById(R.id.progress_bar);
+        tvScreamProb = findViewById(R.id.tv_scream_prob);
+        tvVoiceMatch = findViewById(R.id.tv_voice_match);
+        tvDetectionCount = findViewById(R.id.tv_detection_count);
+        tvEnrollmentStatus = findViewById(R.id.tv_enrollment_status);
+        audioMeterContainer = findViewById(R.id.audio_meter_container);
         Button enrollButton = findViewById(R.id.btn_enroll_voice);
 
         // click listener for enrollment button
@@ -87,6 +99,9 @@ public class AIVoiceActivity extends BaseActivity {
             Intent intent = new Intent(AIVoiceActivity.this, VoiceEnrollmentActivity.class);
             startActivity(intent);
         });
+
+        // Check if voice is enrolled
+        updateEnrollmentStatus();
 
         // Initialize wake lock
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
@@ -214,8 +229,16 @@ public class AIVoiceActivity extends BaseActivity {
 
         // 1. Loudness check first - skip quiet audio
         float rms = PersonalizedVoiceHelper.calculateRMS(audioData);
+
+        // Update audio level meter
+        runOnUiThread(() -> {
+            audioMeterContainer.setVisibility(View.VISIBLE);
+            int audioLevel = (int) (rms * 1000);
+            progressBar.setProgress(Math.min(100, audioLevel));
+        });
+
         if (rms < MIN_VERIFY_RMS) {
-            runOnUiThread(() -> tvStatus.setText("Audio too quiet - skipping"));
+            runOnUiThread(() -> tvStatus.setText("Listening... (audio too quiet)"));
             return;
         }
 
@@ -247,13 +270,24 @@ public class AIVoiceActivity extends BaseActivity {
             boolean isMatch = voiceHelper.verify(averagedScores, audioData);
 
             if (!isMatch) {
-                runOnUiThread(() -> tvStatus.setText("Unrecognized voice - ignoring"));
+                runOnUiThread(() -> {
+                    tvStatus.setText("Voice not matched");
+                    tvVoiceMatch.setText("✗");
+                    tvVoiceMatch.setTextColor(0xFFF44336);
+                });
                 return;
             } else {
-                runOnUiThread(() -> tvStatus.setText("Verified voice - checking scream"));
+                runOnUiThread(() -> {
+                    tvStatus.setText("✓ Voice verified - analyzing...");
+                    tvVoiceMatch.setText("✓");
+                    tvVoiceMatch.setTextColor(0xFF4CAF50);
+                });
             }
         } else {
-            runOnUiThread(() -> tvStatus.setText("No enrolled voice - skipping"));
+            runOnUiThread(() -> {
+                tvStatus.setText("No enrolled voice - please enroll first");
+                tvVoiceMatch.setText("—");
+            });
             return;
         }
 
@@ -274,8 +308,23 @@ public class AIVoiceActivity extends BaseActivity {
 
         // 8. Update UI and handle detection
         runOnUiThread(() -> {
-            String status = String.format("Scream prob: %.2f (RMS: %.2f)", screamProbability, rms);
-            tvStatus.setText(status);
+            // Update scream probability
+            int screamPercent = (int) (screamProbability * 100);
+            tvScreamProb.setText(screamPercent + "%");
+
+            if (screamProbability > SCREAM_THRESHOLD) {
+                tvScreamProb.setTextColor(0xFFF44336); // Red
+                tvStatus.setText("⚠️ Distress detected!");
+            } else if (screamProbability > 0.5f) {
+                tvScreamProb.setTextColor(0xFFFFA726); // Orange
+                tvStatus.setText("Elevated audio level");
+            } else {
+                tvScreamProb.setTextColor(0xFF4CAF50); // Green
+                tvStatus.setText("Monitoring... All clear");
+            }
+
+            // Update detection count
+            tvDetectionCount.setText(positiveCount + "/2");
         });
 
         Log.d("ScreamDetection", "Scream probability: " + screamProbability + " RMS: " + rms);
@@ -395,6 +444,33 @@ public class AIVoiceActivity extends BaseActivity {
                 Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void updateEnrollmentStatus() {
+        new Thread(() -> {
+            try {
+                PersonalizedVoiceHelper helper = new PersonalizedVoiceHelper(this, yamnetInterpreter);
+                boolean hasEnrolled = helper.hasStoredEmbedding();
+
+                runOnUiThread(() -> {
+                    if (hasEnrolled) {
+                        tvEnrollmentStatus.setText("✓ Voice enrolled and active");
+                        tvEnrollmentStatus.setTextColor(0xFF4CAF50);
+                    } else {
+                        tvEnrollmentStatus.setText("⚠ Please enroll your voice for protection");
+                        tvEnrollmentStatus.setTextColor(0xFFF44336);
+                    }
+                });
+            } catch (Exception e) {
+                Log.e("AIVoice", "Error checking enrollment status", e);
+            }
+        }).start();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateEnrollmentStatus();
     }
 
     @Override
