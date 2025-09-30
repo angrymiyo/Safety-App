@@ -32,6 +32,7 @@
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
@@ -152,6 +153,14 @@
             android:name=".service.VoiceMonitorService"
             android:foregroundServiceType="microphone"
             android:exported="false" />
+        <service
+            android:name=".service.ShakeDetectionService"
+            android:foregroundServiceType="specialUse"
+            android:exported="false">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Emergency shake detection for safety" />
+        </service>
 
     </application>
 

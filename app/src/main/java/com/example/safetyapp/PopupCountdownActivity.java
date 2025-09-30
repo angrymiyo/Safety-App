@@ -27,6 +27,18 @@ public class PopupCountdownActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Show on lock screen (without dismissing keyguard)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true);
+            setTurnScreenOn(true);
+        } else {
+            getWindow().addFlags(
+                android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            );
+        }
+
         setContentView(R.layout.activity_popup_countdown);
 
         tvCountdown = findViewById(R.id.tv_countdown);

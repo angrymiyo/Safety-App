@@ -66,6 +66,7 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
     private Sensor accelerometer;
     private ShakeDetector shakeDetector;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,8 +82,8 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
         requestSMSPermission();
         requestMicrophonePermission();
 
-        // Initialize shake detection
-        initializeShakeDetection();
+        // Start background shake detection service
+        startShakeDetectionService();
 
         // Power button triple-press receiver
         powerButtonReceiver = new PowerButtonReceiver();
@@ -120,18 +121,10 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
     }
 
     private void sendSOSEmergency(String method) {
-        pulseView.startAnimation(pulseAnimation);
-        fetchEmergencyMessage(() -> fetchLocation(() -> {
-            String fullMessage = emergencyMessage + "\n\nLocation: " + locationUrl;
-
-            // Use EmergencyMessageHelper with the new SOS-specific method
-            EmergencyMessageHelper helper = new EmergencyMessageHelper(this);
-            helper.sendSOSMessage(method, fullMessage);
-
-            // Show confirmation toast
-            String methodName = "sms".equals(method) ? "SMS" : "WhatsApp";
-            Toast.makeText(this, "SOS initiated via " + methodName, Toast.LENGTH_SHORT).show();
-        }));
+        // Show popup countdown
+        Intent intent = new Intent(this, PopupCountdownActivity.class);
+        intent.putExtra("method", method);
+        startActivity(intent);
     }
 
     private void initializeShakeDetection() {
@@ -140,7 +133,7 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
             accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             if (accelerometer != null) {
                 shakeDetector = new ShakeDetector(this);
-                shakeDetector.setRequiredShakeCount(3); // Require 3 shakes
+                shakeDetector.setRequiredShakeCount(3);
                 Toast.makeText(this, "Shake detection enabled - shake 3 times for emergency", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(this, "Accelerometer not available - shake detection disabled", Toast.LENGTH_LONG).show();
@@ -150,26 +143,10 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
 
     @Override
     public void onShake() {
-        // This method is called when 3 shakes are detected
-        Toast.makeText(this, "Emergency shake detected! Sending alert...", Toast.LENGTH_LONG).show();
-
-        // Shake detection always uses SMS + Facebook only
-        sendShakeEmergency();
+        // Shake detection is now handled by background service only
+        // This method is not used anymore but kept for interface implementation
     }
 
-    private void sendShakeEmergency() {
-        pulseView.startAnimation(pulseAnimation);
-        fetchEmergencyMessage(() -> fetchLocation(() -> {
-            String fullMessage = emergencyMessage + "\n\nLocation: " + locationUrl + "\n\n[Emergency triggered by shake detection]";
-
-            // Shake detection only uses SMS + Facebook (no WhatsApp)
-            EmergencyMessageHelper helper = new EmergencyMessageHelper(this);
-            helper.sendCustomMessage("sms", fullMessage); // Always SMS for shake
-            helper.postToFacebookFeed(fullMessage); // Always Facebook for shake
-
-            Toast.makeText(this, "Shake emergency sent via SMS and posted to Facebook", Toast.LENGTH_SHORT).show();
-        }));
-    }
 
     private void capturePhoto() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -268,22 +245,32 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
     }
 
 
+    private void startShakeDetectionService() {
+        try {
+            Intent serviceIntent = new Intent(this, com.example.safetyapp.service.ShakeDetectionService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);
+            }
+        } catch (Exception e) {
+            Toast.makeText(this, "Shake service failed, using in-app mode", Toast.LENGTH_SHORT).show();
+            // Fallback to in-app shake detection if service fails
+            initializeShakeDetection();
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
-        // Register shake detection sensor listener
-        if (sensorManager != null && accelerometer != null && shakeDetector != null) {
-            sensorManager.registerListener(shakeDetector, accelerometer, SensorManager.SENSOR_DELAY_UI);
-        }
+        // Background service handles all shake detection
+        // No in-app shake detection needed
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        // Unregister shake detection sensor listener to save battery
-        if (sensorManager != null && shakeDetector != null) {
-            sensorManager.unregisterListener(shakeDetector);
-        }
+        // Background service continues running
     }
 
     @Override protected void onDestroy() {
@@ -291,10 +278,7 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
         if (powerButtonReceiver != null) {
             unregisterReceiver(powerButtonReceiver);
         }
-        // Ensure sensor listener is unregistered
-        if (sensorManager != null && shakeDetector != null) {
-            sensorManager.unregisterListener(shakeDetector);
-        }
+        // Background service continues running
     }
 
     private void requestNotificationPermission() {
