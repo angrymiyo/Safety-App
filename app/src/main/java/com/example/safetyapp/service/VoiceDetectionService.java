@@ -47,10 +47,14 @@ public class VoiceDetectionService extends Service {
     private static final int RECORD_DURATION_MS = 975;
     private static final int BUFFER_SIZE = SAMPLE_RATE * RECORD_DURATION_MS / 1000;
 
-    private static final float SCREAM_THRESHOLD = 0.8f;
-    private static final float MIN_VERIFY_RMS = 0.08f;
-    private static final int CONSECUTIVE_POSITIVES_REQUIRED = 3;
+    // Optimized thresholds for faster and more accurate detection
+    private static final float SCREAM_THRESHOLD = 0.65f; // Lowered for better sensitivity
+    private static final float MIN_VERIFY_RMS = 0.03f; // Very low to catch even quiet distress voices
+    private static final int CONSECUTIVE_POSITIVES_REQUIRED = 2; // Reduced from 3 for faster response (1.5-2 seconds)
     private static final long COOLDOWN_MS = 30_000;
+
+    // Enhanced detection parameters
+    private static final int PROCESSING_INTERVAL_MS = 30; // Reduced from 50ms for faster checking
 
     private AudioRecord audioRecord;
     private boolean isRecording = false;
@@ -165,7 +169,7 @@ public class VoiceDetectionService extends Service {
                     }
                 }
                 try {
-                    Thread.sleep(50);
+                    Thread.sleep(PROCESSING_INTERVAL_MS); // Faster processing (30ms instead of 50ms)
                 } catch (InterruptedException e) {
                     Log.e(TAG, "Sleep interrupted", e);
                 }
@@ -190,10 +194,14 @@ public class VoiceDetectionService extends Service {
             return;
         }
 
+        // Convert to float and apply pre-emphasis filter for better voice detection
         float[] floatInput = new float[audioData.length];
         for (int i = 0; i < audioData.length; i++) {
             floatInput[i] = audioData[i] / 32767f;
         }
+
+        // Apply pre-emphasis to enhance high frequencies (improves distress voice detection)
+        floatInput = applyPreEmphasis(floatInput);
 
         Object[] inputs = new Object[]{floatInput};
         Map<Integer, Object> outputs = new HashMap<>();
@@ -238,16 +246,30 @@ public class VoiceDetectionService extends Service {
 
         if (screamProb > SCREAM_THRESHOLD) {
             positiveCount++;
-            Log.d(TAG, "Positive scream count: " + positiveCount);
+            Log.d(TAG, "Positive scream count: " + positiveCount + " (prob: " + screamProb + ", RMS: " + rms + ")");
 
             if (positiveCount >= CONSECUTIVE_POSITIVES_REQUIRED) {
-                Log.i(TAG, "Scream detected - triggering emergency");
+                Log.i(TAG, "Distress voice detected - triggering emergency (prob: " + screamProb + ")");
                 positiveCount = 0;
                 mainHandler.post(this::triggerEmergency);
             }
         } else {
             positiveCount = Math.max(0, positiveCount - 1);
         }
+    }
+
+    /**
+     * Apply pre-emphasis filter to enhance high-frequency components
+     * This improves detection of distress voices (screaming has high-frequency energy)
+     */
+    private float[] applyPreEmphasis(float[] audio) {
+        float preEmphasisCoeff = 0.97f;
+        float[] filtered = new float[audio.length];
+        filtered[0] = audio[0];
+        for (int i = 1; i < audio.length; i++) {
+            filtered[i] = audio[i] - preEmphasisCoeff * audio[i - 1];
+        }
+        return filtered;
     }
 
     private void triggerEmergency() {
@@ -304,6 +326,12 @@ public class VoiceDetectionService extends Service {
                 manager.createNotificationChannel(channel);
             }
         }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(TAG, "Service started/restarted");
+        return START_STICKY; // Automatically restart if killed by system
     }
 
     @Override

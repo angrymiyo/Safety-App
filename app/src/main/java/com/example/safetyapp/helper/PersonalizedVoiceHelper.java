@@ -8,14 +8,16 @@ import org.tensorflow.lite.Interpreter;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class PersonalizedVoiceHelper {
     private static final String TAG = "VoiceHelper";
     private static final String EMBEDDING_FILE = "user_embedding.dat";
-    private static final float MATCH_THRESHOLD = 0.35f; // Optimized for shout recognition
-    private static final float MIN_ENROLL_RMS = 0.1f;   // Minimum loudness for enrollment
-    private static final float MIN_VERIFY_RMS = 0.08f;  // Minimum loudness for verification
+    private static final float MATCH_THRESHOLD = 0.30f; // Lowered for better matching
+    private static final float MIN_ENROLL_RMS = 0.08f;  // Lowered for enrollment
+    private static final float MIN_VERIFY_RMS = 0.03f;  // Very low to catch quiet distress
 
     private final Context context;
     private final Interpreter yamnetInterpreter;
