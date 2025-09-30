@@ -47,10 +47,11 @@ public class VoiceDetectionService extends Service {
     private static final int RECORD_DURATION_MS = 975;
     private static final int BUFFER_SIZE = SAMPLE_RATE * RECORD_DURATION_MS / 1000;
 
-    // Optimized thresholds for faster and more accurate detection
-    private static final float SCREAM_THRESHOLD = 0.65f; // Lowered for better sensitivity
-    private static final float MIN_VERIFY_RMS = 0.03f; // Very low to catch even quiet distress voices
-    private static final int CONSECUTIVE_POSITIVES_REQUIRED = 2; // Reduced from 3 for faster response (1.5-2 seconds)
+    // Optimized thresholds for distress-only detection (balanced for accuracy + speed)
+    private static final float SCREAM_THRESHOLD = 0.73f; // High accuracy - only real distress screams
+    private static final float MIN_VERIFY_RMS = 0.05f; // Lower volume required - catches quieter distress
+    private static final float HIGH_INTENSITY_RMS = 0.10f; // Moderate intensity - not too loud required
+    private static final int CONSECUTIVE_POSITIVES_REQUIRED = 2; // Fast response (2 confirmations = ~2 seconds)
     private static final long COOLDOWN_MS = 30_000;
 
     // Enhanced detection parameters
@@ -242,19 +243,27 @@ public class VoiceDetectionService extends Service {
             return;
         }
 
-        Log.d(TAG, "Scream probability: " + screamProb);
+        Log.d(TAG, "Scream probability: " + screamProb + " RMS: " + rms);
 
-        if (screamProb > SCREAM_THRESHOLD) {
+        // STRICT DISTRESS DETECTION: Require BOTH high scream probability AND high intensity
+        boolean isHighIntensity = rms >= HIGH_INTENSITY_RMS;
+        boolean isDistressScream = screamProb > SCREAM_THRESHOLD;
+
+        if (isDistressScream && isHighIntensity) {
             positiveCount++;
-            Log.d(TAG, "Positive scream count: " + positiveCount + " (prob: " + screamProb + ", RMS: " + rms + ")");
+            Log.d(TAG, "DISTRESS DETECTED - Count: " + positiveCount + " (prob: " + screamProb + ", RMS: " + rms + ")");
 
             if (positiveCount >= CONSECUTIVE_POSITIVES_REQUIRED) {
-                Log.i(TAG, "Distress voice detected - triggering emergency (prob: " + screamProb + ")");
+                Log.i(TAG, "EMERGENCY: Genuine distress voice confirmed - triggering alert");
                 positiveCount = 0;
                 mainHandler.post(this::triggerEmergency);
             }
         } else {
-            positiveCount = Math.max(0, positiveCount - 1);
+            // Decay positive count if not distress
+            if (positiveCount > 0) {
+                positiveCount--;
+                Log.d(TAG, "Not distress - reducing count: " + positiveCount + " (prob: " + screamProb + ", RMS: " + rms + ", intensity: " + isHighIntensity + ")");
+            }
         }
     }
 
