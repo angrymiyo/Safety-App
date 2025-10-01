@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tablet 10" dimensions -->
+    <!-- Text sizes -->
+    <dimen name="text_welcome">24sp</dimen>
+    <dimen name="text_app_name">36sp</dimen>
+    <dimen name="text_section_title">26sp</dimen>
+    <dimen name="text_card_title">14sp</dimen>
+
+    <!-- SOS Button -->
+    <dimen name="sos_card_size">280dp</dimen>
+    <dimen name="sos_button_size">140dp</dimen>
+    <dimen name="sos_pulse_outer">200dp</dimen>
+    <dimen name="sos_pulse_middle">170dp</dimen>
+    <dimen name="sos_text_size">36sp</dimen>
+
+    <!-- Card dimensions -->
+    <dimen name="feature_card_height">160dp</dimen>
+    <dimen name="feature_icon_size">64dp</dimen>
+    <dimen name="card_corner_radius">24dp</dimen>
+    <dimen name="card_elevation">8dp</dimen>
+    <dimen name="card_padding">20dp</dimen>
+
+    <!-- Spacing -->
+    <dimen name="spacing_small">10dp</dimen>
+    <dimen name="spacing_medium">16dp</dimen>
+    <dimen name="spacing_large">24dp</dimen>
+    <dimen name="spacing_xlarge">32dp</dimen>
+    <dimen name="spacing_xxlarge">40dp</dimen>
+    <dimen name="padding_screen">32dp</dimen>
+    <dimen name="padding_top">64dp</dimen>
+</resources>

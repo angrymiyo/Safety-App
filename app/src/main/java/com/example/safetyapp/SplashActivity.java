@@ -15,10 +15,6 @@ public class SplashActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        ImageView staySafeImage = findViewById(R.id.staySafeImage);
-        Animation fadeInSlideUp = AnimationUtils.loadAnimation(this, R.anim.fade_in_slide_up);
-        staySafeImage.startAnimation(fadeInSlideUp);
-
 
         ImageView logo = findViewById(R.id.logoImageView);
         Animation fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);

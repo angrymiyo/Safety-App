@@ -2,36 +2,58 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/home_page"
+    android:background="@drawable/bg_gradient"
     android:gravity="center">
 
-    <ImageView
-        android:id="@+id/logoImageView"
-        android:layout_width="271dp"
-        android:layout_height="224dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginStart="69dp"
-        android:layout_marginTop="120dp"
-        android:layout_marginEnd="72dp"
-        android:contentDescription="App Icon"
-        android:src="@drawable/splash" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        android:padding="32dp">
 
-    <ImageView
-        android:id="@+id/staySafeImage"
-        android:layout_width="363dp"
-        android:layout_height="93dp"
-        android:layout_below="@id/logoImageView"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
+        <ImageView
+            android:id="@+id/logoImageView"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:contentDescription="App Icon"
+            android:src="@drawable/splash"
+            android:layout_marginBottom="32dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="নির্ভয়"
+            android:textColor="@color/white"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your Personal Safety Companion"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:alpha="0.9"
+            android:fontFamily="sans-serif-light"
+            android:gravity="center"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="-11dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="305dp"
-        android:contentDescription="App Text"
-        android:src="@drawable/stay_safe" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="32dp"
+        android:text="Stay Safe, Stay Connected"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        android:alpha="0.7"
+        android:fontFamily="sans-serif-medium"/>
 
 </RelativeLayout>
 

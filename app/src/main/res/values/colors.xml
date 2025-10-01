@@ -15,6 +15,20 @@
 
     <color name="blue_icon">#1623EE</color>
 
+    <!-- Professional Safety App Colors -->
+    <color name="primary_gradient_start">#1E3A8A</color>
+    <color name="primary_gradient_end">#0F172A</color>
+    <color name="accent_purple">#8B5CF6</color>
+    <color name="accent_red">#EF4444</color>
+    <color name="accent_amber">#F59E0B</color>
+    <color name="accent_blue">#3B82F6</color>
+    <color name="accent_emerald">#10B981</color>
+    <color name="accent_teal">#14B8A6</color>
+    <color name="sos_red">#DC2626</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="text_primary">#1F2937</color>
+    <color name="text_secondary">#6B7280</color>
+    <color name="background_light">#F9FAFB</color>
 
     <!-- Optional: Shades for consistency -->
     <color name="green">#347433</color>

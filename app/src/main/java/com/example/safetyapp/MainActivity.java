@@ -70,7 +70,7 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupLayout(R.layout.activity_main, "Welcome to নির্ভয়!", false, R.id.nav_home);
+        setContentView(R.layout.activity_main);
 
         pulseView = findViewById(R.id.pulse_view);
         FrameLayout startShakeButton = findViewById(R.id.btn_sos);
@@ -97,7 +97,31 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
             showSOSMethodDialog();
         });
 
-
+        // Bottom Navigation
+        com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
+        bottomNav.setSelectedItemId(R.id.nav_home);
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_home) {
+                return true;
+            } else if (id == R.id.nav_settings) {
+                startActivity(new Intent(this, SettingsActivity.class));
+                finish();
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                finish();
+                return true;
+            } else if (id == R.id.nav_logout) {
+                mAuth.signOut();
+                Intent intent = new Intent(this, LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+                return true;
+            }
+            return false;
+        });
 
         // Navigation Buttons
         findViewById(R.id.btn_save_contatcs).setOnClickListener(v -> startActivity(new Intent(this, SaveSMSActivity.class)));
@@ -108,20 +132,31 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
     }
 
     private void showSOSMethodDialog() {
+        // Direct SOS - send immediately without countdown
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("SOS Alert")
                 .setMessage("Choose how to send your emergency message:")
                 .setPositiveButton("SMS", (dialog, which) -> {
-                    sendSOSEmergency("sms");
+                    sendSOSImmediately("sms");
                 })
                 .setNegativeButton("WhatsApp", (dialog, which) -> {
-                    sendSOSEmergency("whatsapp");
+                    sendSOSImmediately("whatsapp");
                 })
                 .show();
     }
 
+    private void sendSOSImmediately(String method) {
+        // Send SOS immediately without countdown
+        fetchEmergencyMessage(() -> fetchLocation(() -> {
+            String fullMessage = emergencyMessage + "\n\nLocation: " + locationUrl;
+            EmergencyMessageHelper helper = new EmergencyMessageHelper(MainActivity.this);
+            helper.sendCustomMessage(method, fullMessage);
+            Toast.makeText(this, "Emergency alert sent!", Toast.LENGTH_SHORT).show();
+        }));
+    }
+
     private void sendSOSEmergency(String method) {
-        // Show popup countdown
+        // Show popup countdown - Only used for shake and power button triggers
         Intent intent = new Intent(this, PopupCountdownActivity.class);
         intent.putExtra("method", method);
         startActivity(intent);
