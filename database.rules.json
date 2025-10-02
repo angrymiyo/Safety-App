@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "Users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "LiveLocations": {
+      "$sessionId": {
+        ".read": true,
+        ".write": "auth != null",
+        ".indexOn": ["startTime"]
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Shadow Layer -->
+    <item android:top="4dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="#B0B91C1C"
+                android:centerColor="#B0DC2626"
+                android:endColor="#B0EF4444"
+                android:type="linear" />
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+
+    <!-- Main Gradient Background -->
+    <item android:bottom="4dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="#B91C1C"
+                android:centerColor="#DC2626"
+                android:endColor="#EF4444"
+                android:type="linear" />
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+
+    <!-- Glass Shine Effect -->
+    <item android:bottom="4dp">
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="90"
+                android:startColor="#60FFFFFF"
+                android:centerColor="#20FFFFFF"
+                android:endColor="#00FFFFFF"
+                android:type="linear" />
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+
+    <!-- Top Border Highlight -->
+    <item
+        android:bottom="4dp"
+        android:top="0dp"
+        android:left="0dp"
+        android:right="0dp">
+        <shape android:shape="rectangle">
+            <stroke
+                android:width="1.5dp"
+                android:color="#50FFFFFF" />
+            <corners android:radius="18dp" />
+        </shape>
+    </item>
+</layer-list>

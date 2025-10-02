@@ -12,8 +12,11 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.telephony.SmsManager;
 import android.widget.Toast;
+import com.example.safetyapp.LocationTrackingService;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -23,14 +26,23 @@ import com.example.safetyapp.Contact;
 import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.widget.ShareDialog;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.*;
 
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class EmergencyMessageHelper {
     private static final int LOCATION_PERMISSION_CODE = 101;
@@ -40,29 +52,77 @@ public class EmergencyMessageHelper {
     private final FusedLocationProviderClient locationProvider;
     private final FirebaseUser currentUser;
     private final DatabaseReference userRef;
+    private final DatabaseReference liveLocationRef;
     private String savedTemplate = "";
     private final List<Contact> contacts = new ArrayList<>();
+    private String shareId;
+    private boolean isTracking = false;
+    private LocationCallback locationCallback;
+    private Handler handler;
 
     public EmergencyMessageHelper(Activity activity) {
         this.activity = activity;
         this.locationProvider = LocationServices.getFusedLocationProviderClient(activity);
         this.currentUser = FirebaseAuth.getInstance().getCurrentUser();
         this.userRef = FirebaseDatabase.getInstance().getReference("Users").child(currentUser.getUid());
+        this.liveLocationRef = FirebaseDatabase.getInstance().getReference("LiveLocations");
+        this.handler = new Handler(Looper.getMainLooper());
+        setupLocationCallback();
+    }
+
+    private void setupLocationCallback() {
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null || !isTracking) return;
+
+                for (Location location : locationResult.getLocations()) {
+                    updateLiveLocation(location);
+                }
+            }
+        };
+    }
+
+    private void updateLiveLocation(Location location) {
+        if (shareId == null || !isTracking) return;
+
+        if (location.getAccuracy() > 50.0f) return;
+
+        Map<String, Object> locationData = new HashMap<>();
+        locationData.put("latitude", location.getLatitude());
+        locationData.put("longitude", location.getLongitude());
+        locationData.put("accuracy", location.getAccuracy());
+        locationData.put("timestamp", System.currentTimeMillis());
+
+        liveLocationRef.child(shareId).child("currentLocation").setValue(locationData);
+        liveLocationRef.child(shareId).child("locationHistory").push().setValue(locationData);
     }
 
     public void sendMessage(String method) {
+        // Check location permission
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
             return;
         }
 
-        if ("sms".equals(method) && ContextCompat.checkSelfPermission(activity, Manifest.permission.SEND_SMS)
+        // Check background location permission (Android 10+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 103);
+                return;
+            }
+        }
+
+        // Check SMS permission
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.SEND_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS}, SMS_PERMISSION_CODE);
             return;
         }
 
+        // Load contacts
         userRef.child("emergencyContacts").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -75,38 +135,66 @@ public class EmergencyMessageHelper {
                 }
 
                 if (contacts.isEmpty()) {
-                    Toast.makeText(activity, "No emergency contacts found", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(activity, "No emergency contacts found. Please add contacts from Settings.", Toast.LENGTH_LONG).show();
                     return;
                 }
 
-                userRef.child("emergency_message_template").addListenerForSingleValueEvent(new ValueEventListener() {
-                    @SuppressLint("MissingPermission")
-                    @Override
-                    public void onDataChange(DataSnapshot snapshot) {
-                        savedTemplate = snapshot.exists() ? snapshot.getValue(String.class) : "Help me!";
+                // Generate unique share ID
+                shareId = currentUser.getUid() + "_" + System.currentTimeMillis();
+                isTracking = true;
 
-                        locationProvider.getLastLocation()
-                                .addOnSuccessListener(location -> {
-                                    if (location != null) {
-                                        String message = savedTemplate + "\n\nMy location: https://www.google.com/maps?q=" + location.getLatitude() + "," + location.getLongitude();
-                                        for (Contact contact : contacts) {
-                                            if ("sms".equals(method)) {
-                                                sendSms(contact.getPhone(), message);
-                                            } else {
-                                                sendWhatsApp(contact.getPhone(), message);
-                                            }
-                                        }
+                // Create session in Firebase
+                Map<String, Object> sessionData = new HashMap<>();
+                sessionData.put("userId", currentUser.getUid());
+                sessionData.put("userEmail", currentUser.getEmail());
+                sessionData.put("startTime", System.currentTimeMillis());
+                sessionData.put("isActive", true);
+                liveLocationRef.child(shareId).setValue(sessionData);
 
-                                        postToFacebookFeed(message);
-                                    } else {
-                                        Toast.makeText(activity, "Unable to get location", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
-                    }
+                // Start Foreground Service for background tracking
+                Intent serviceIntent = new Intent(activity, LocationTrackingService.class);
+                serviceIntent.putExtra("shareId", shareId);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    activity.startForegroundService(serviceIntent);
+                } else {
+                    activity.startService(serviceIntent);
+                }
 
-                    @Override
-                    public void onCancelled(DatabaseError error) {
-                        Toast.makeText(activity, "Failed to load message", Toast.LENGTH_SHORT).show();
+                // Get initial location and send message
+                locationProvider.getLastLocation().addOnSuccessListener(location -> {
+                    if (location != null) {
+                        // Get saved emergency message
+                        userRef.child("emergency_message_template").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot snapshot) {
+                                String savedMessage = snapshot.getValue(String.class);
+
+                                // Use saved custom message or default
+                                if (savedMessage == null || savedMessage.isEmpty()) {
+                                    savedMessage = "Emergency! I need help!";
+                                }
+
+                                // Clean tracking URL
+                                String trackingUrl = "https://safetyapp-2042f.web.app/track?id=" + shareId;
+                                String finalMessage = savedMessage + "\n\n📍 " + trackingUrl;
+
+                                // Send to all emergency contacts via WhatsApp AND SMS
+                                for (Contact contact : contacts) {
+                                    sendWhatsApp(contact.getPhone(), finalMessage);
+                                    sendSms(contact.getPhone(), finalMessage);
+                                }
+
+                                Toast.makeText(activity, "Live tracking started! Sent to " + contacts.size() + " contacts", Toast.LENGTH_SHORT).show();
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError error) {
+                                // Fallback if Firebase message fetch fails
+                                Toast.makeText(activity, "Unable to load custom message", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        Toast.makeText(activity, "Unable to get location", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -268,5 +356,24 @@ public class EmergencyMessageHelper {
                 .setAutoCancel(true);
 
         notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+    }
+
+    public void stopTracking() {
+        if (!isTracking) return;
+
+        isTracking = false;
+        handler.removeCallbacksAndMessages(null);
+
+        // Stop the Foreground Service
+        Intent serviceIntent = new Intent(activity, LocationTrackingService.class);
+        serviceIntent.putExtra("action", "STOP");
+        serviceIntent.putExtra("shareId", shareId);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            activity.startForegroundService(serviceIntent);
+        } else {
+            activity.startService(serviceIntent);
+        }
+
+        Toast.makeText(activity, "Live tracking stopped", Toast.LENGTH_SHORT).show();
     }
 }

@@ -1,95 +1,314 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/layout_live_location"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    android:background="@color/Light_Sky_Blue">
+    android:background="@drawable/gradient_background_live">
 
-    <!-- Location Icon (Add vector drawable for better scalability) -->
-    <ImageView
-        android:id="@+id/imgLocation"
+    <!-- Outer Glow Ring with Animation -->
+    <View
+        android:id="@+id/glowRingOuter"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="60dp"
-        android:src="@drawable/map"
-        android:scaleType="centerInside" />
+        android:layout_marginTop="20dp"
+        android:background="@drawable/glow_ring_outer"
+        android:alpha="0.5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Title Text -->
+    <!-- Middle Glow Ring -->
+    <View
+        android:id="@+id/glowRingMiddle"
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:background="@drawable/glow_ring_middle"
+        android:alpha="0.6"
+        app:layout_constraintBottom_toBottomOf="@id/glowRingOuter"
+        app:layout_constraintEnd_toEndOf="@id/glowRingOuter"
+        app:layout_constraintStart_toStartOf="@id/glowRingOuter"
+        app:layout_constraintTop_toTopOf="@id/glowRingOuter" />
+
+    <!-- Animated Circle Background for Icon -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/circleCard"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        app:cardCornerRadius="80dp"
+        app:cardElevation="16dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:layout_constraintBottom_toBottomOf="@id/glowRingOuter"
+        app:layout_constraintEnd_toEndOf="@id/glowRingOuter"
+        app:layout_constraintStart_toStartOf="@id/glowRingOuter"
+        app:layout_constraintTop_toTopOf="@id/glowRingOuter">
+
+        <View
+            android:id="@+id/circleBackground"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/circle_gradient_live" />
+
+        <!-- Location Icon -->
+        <ImageView
+            android:id="@+id/imgLocation"
+            android:layout_width="95dp"
+            android:layout_height="95dp"
+            android:src="@drawable/map"
+            android:scaleType="fitCenter"
+            android:layout_gravity="center" />
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Title Text with Shadow -->
     <TextView
         android:id="@+id/txtTitle"
-        android:layout_below="@id/imgLocation"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
-        android:layout_centerHorizontal="true"
-        android:text="Share Your Live Location"
-        android:textSize="22sp"
+        android:layout_marginEnd="24dp"
+        android:text="Live Location Sharing"
+        android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/Deep_Navy" />
-
-    <!-- Description Text -->
-    <TextView
-        android:id="@+id/txtDescription"
-        android:layout_below="@id/txtTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_centerHorizontal="true"
-        android:text="Let your emergency contacts know where you are in real-time."
-        android:textSize="16sp"
-        android:textColor="@color/Muted_Teal"
-        android:gravity="center" />
-
-    <!-- Status Text -->
-    <TextView
-        android:id="@+id/tvStatus"
-        android:layout_below="@id/txtDescription"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:layout_centerHorizontal="true"
-        android:text="Ready to share live location"
-        android:textSize="14sp"
-        android:textColor="@color/Muted_Teal"
+        android:textColor="#1E293B"
         android:gravity="center"
-        android:padding="8dp"
-        android:background="@android:color/white" />
-
-    <!-- Share Location Button -->
-    <Button
-        android:id="@+id/btnShareLocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tvStatus"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="@color/Deep_Navy"
-        android:drawablePadding="12dp"
-        android:elevation="4dp"
         android:fontFamily="sans-serif-medium"
-        android:padding="16dp"
-        android:text="📍 Start Live Location Sharing"
-        android:textColor="@android:color/white"
-        android:textSize="18sp" />
+        android:letterSpacing="0.03"
+        android:shadowColor="#50000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/circleCard" />
 
-    <!-- Stop Sharing Button -->
-    <Button
-        android:id="@+id/btnStopSharing"
-        android:layout_width="match_parent"
+    <!-- Subtitle Description -->
+    <TextView
+        android:id="@+id/txtSubtitle"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btnShareLocation"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="100dp"
-        android:backgroundTint="@android:color/holo_red_dark"
-        android:drawablePadding="12dp"
-        android:elevation="4dp"
-        android:fontFamily="sans-serif-medium"
-        android:padding="16dp"
-        android:text="🛑 Stop Sharing"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:enabled="false" />
-</RelativeLayout>
+        android:layout_marginEnd="32dp"
+        android:text="Share your real-time location with trusted contacts"
+        android:textSize="10sp"
+        android:textColor="#64748B"
+        android:gravity="center"
+        android:fontFamily="sans-serif"
+        android:letterSpacing="0.01"
+        android:alpha="0.9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtTitle" />
+
+    <!-- Info Badge -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/infoBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#F0FDF4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtSubtitle">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="10dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="6dp"
+                android:src="@drawable/ic_clock" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Duration: 1 Hour"
+                android:textSize="12sp"
+                android:textColor="#15803D"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.02" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Start Live Sharing Button Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/infoBadge">
+
+        <Button
+            android:id="@+id/btnShareLocation"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="@drawable/button_gradient_primary"
+            android:text="Start Live Sharing"
+            android:textColor="@android:color/white"
+            android:textSize="19sp"
+            android:textStyle="bold"
+            android:paddingStart="28dp"
+            android:paddingEnd="28dp"
+            android:drawableStart="@drawable/ic_location"
+            android:drawablePadding="12dp"
+            android:drawableTint="@android:color/white"
+            android:gravity="center"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.05"
+            android:textAllCaps="false"
+            android:elevation="8dp"
+            android:stateListAnimator="@null" />
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Bottom Section Container -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="24dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardStatus">
+
+        <!-- Status Card with Glassmorphism -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="18dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="#F5FFFFFF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/glass_card_background">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="10dp"
+                    android:gravity="center_vertical">
+
+                    <!-- Status Indicator Dot with Glow -->
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="14dp">
+
+                        <View
+                            android:id="@+id/statusDotGlow"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:background="@drawable/status_dot_glow"
+                            android:layout_gravity="center" />
+
+                        <View
+                            android:id="@+id/statusDot"
+                            android:layout_width="11dp"
+                            android:layout_height="11dp"
+                            android:background="@drawable/status_dot_inactive"
+                            android:layout_gravity="center" />
+                    </FrameLayout>
+
+                    <!-- Status Text Column -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tvStatus"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Ready to share"
+                            android:textSize="15sp"
+                            android:textColor="#1E293B"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="Tap the button to start"
+                            android:textSize="12sp"
+                            android:textColor="#64748B"
+                            android:fontFamily="sans-serif" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Stop Sharing Button with Premium Design -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="10dp"
+            app:cardBackgroundColor="@android:color/transparent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/stop_button_premium_bg">
+
+                <Button
+                    android:id="@+id/btnStopSharing"
+                    android:layout_width="match_parent"
+                    android:layout_height="64dp"
+                    android:background="@android:color/transparent"
+                    android:text="Stop Sharing"
+                    android:textColor="@android:color/white"
+                    android:textSize="19sp"
+                    android:textStyle="bold"
+                    android:paddingStart="28dp"
+                    android:paddingEnd="28dp"
+                    android:drawableStart="@drawable/ic_stop_24"
+                    android:drawablePadding="12dp"
+                    android:drawableTint="@android:color/white"
+                    android:gravity="center"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.05"
+                    android:textAllCaps="false"
+                    android:enabled="false"
+                    android:stateListAnimator="@null" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
