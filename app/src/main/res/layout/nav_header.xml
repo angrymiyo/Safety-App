@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    android:background="@drawable/nav_header_bg"
+    android:orientation="vertical"
+    android:padding="28dp"
+    android:gravity="bottom">
+
+    <ImageView
+        android:id="@+id/nav_profile_image"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/ic_profile"
+        android:background="@drawable/profile_circle_bg"
+        android:padding="14dp"
+        android:elevation="4dp"
+        android:scaleType="centerCrop"
+        android:clickable="true"
+        android:focusable="true"
+        android:contentDescription="Profile Picture - Tap to change" />
+
+    <TextView
+        android:id="@+id/nav_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User Name"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="6dp" />
+
+    <TextView
+        android:id="@+id/nav_user_email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="user@email.com"
+        android:textColor="#E0FFFFFF"
+        android:textSize="14sp"
+        android:fontFamily="sans-serif" />
+</LinearLayout>

@@ -39,6 +39,7 @@ dependencies {
     implementation ("androidx.activity:activity:1.10.1")
     implementation ("com.google.android.material:material:1.9.0")
     implementation ("com.google.firebase:firebase-database:21.0.0")
+    implementation ("com.google.firebase:firebase-storage:21.0.1")
     implementation ("com.google.android.gms:play-services-maps:19.2.0")
     implementation ("com.google.android.gms:play-services-location:21.3.0")
     implementation ("com.google.android.gms:play-services-auth:21.3.0")
@@ -50,6 +51,10 @@ dependencies {
     implementation ("com.google.firebase:firebase-auth:latest_version")
     implementation ("org.tensorflow:tensorflow-lite:2.14.0")
     implementation ("org.tensorflow:tensorflow-lite-select-tf-ops:2.14.0")
+
+    // Glide for image loading
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 
 
 }

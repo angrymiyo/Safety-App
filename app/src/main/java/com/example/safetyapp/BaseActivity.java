@@ -38,6 +38,19 @@ public abstract class BaseActivity extends AppCompatActivity {
      * @param selectedNavItemId The menu item id to select in BottomNavigationView.
      */
     protected void setupLayout(int layoutResId, @Nullable String title, boolean showBackButton, int selectedNavItemId) {
+        setupLayout(layoutResId, title, showBackButton, selectedNavItemId, true);
+    }
+
+    /**
+     * Sets up the base layout with navigation drawer, bottom nav, toolbar with title and back button.
+     *
+     * @param layoutResId       The layout resource id for the activity's main content.
+     * @param title             The toolbar title text. Pass null or empty string for no title.
+     * @param showBackButton    True to show back button, false to hide.
+     * @param selectedNavItemId The menu item id to select in BottomNavigationView.
+     * @param showBottomNav     True to show bottom navigation, false to hide.
+     */
+    protected void setupLayout(int layoutResId, @Nullable String title, boolean showBackButton, int selectedNavItemId, boolean showBottomNav) {
         setContentView(R.layout.activity_base);
 
         // Inflate the activity content layout into FrameLayout inside base layout
@@ -71,37 +84,38 @@ public abstract class BaseActivity extends AppCompatActivity {
         // Setup bottom navigation listener and set selected item
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
 
-        // Select the current item
-        bottomNav.setSelectedItemId(selectedNavItemId);
+        // Show or hide bottom navigation
+        if (bottomNav != null) {
+            bottomNav.setVisibility(showBottomNav ? View.VISIBLE : View.GONE);
+        }
 
-        bottomNav.setOnItemSelectedListener(item -> {
-            int id = item.getItemId();
+        if (showBottomNav) {
+            // Select the current item
+            bottomNav.setSelectedItemId(selectedNavItemId);
 
-            if (id == R.id.nav_home) {
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
-                return true;
-            } else if (id == R.id.nav_settings) {
-                if (selectedNavItemId != R.id.nav_settings) {
-                    startActivity(new Intent(this, SettingsActivity.class));
-                    finish();
+            bottomNav.setOnItemSelectedListener(item -> {
+                int id = item.getItemId();
+
+                if (id == R.id.nav_home) {
+                    if (selectedNavItemId != R.id.nav_home) {
+                        Intent intent = new Intent(this, MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();
+                    }
+                    return true;
+                } else if (id == R.id.nav_profile) {
+                    if (selectedNavItemId != R.id.nav_profile) {
+                        startActivity(new Intent(this, ProfileActivity.class));
+                        finish();
+                    }
+                    return true;
                 }
-                return true;
-            } else if (id == R.id.nav_profile) {
-                if (selectedNavItemId != R.id.nav_profile) {
-                    startActivity(new Intent(this, ProfileActivity.class));
-                    finish();
-                }
-                return true;
-            } else if (id == R.id.nav_logout) {
-                logoutUser();
-                return true;
-            }
-            return false;
-        });
+                return false;
+            });
+        }
     }
+
 
     @Override
     protected void onStart() {

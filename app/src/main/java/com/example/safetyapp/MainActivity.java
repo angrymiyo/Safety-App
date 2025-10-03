@@ -6,16 +6,22 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -25,6 +31,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import com.google.android.material.navigation.NavigationView;
 
 import com.example.safetyapp.helper.EmergencyMessageHelper;
 import com.facebook.share.model.SharePhoto;
@@ -46,6 +56,8 @@ import java.util.Date;
 
 public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeListener {
 
+    private DrawerLayout drawerLayout;
+    private NavigationView navigationView;
     private View pulseView;
     private Animation pulseAnimation;
     private PowerButtonReceiver powerButtonReceiver;
@@ -97,30 +109,88 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
             showSOSMethodDialog();
         });
 
-        // Bottom Navigation
-        com.google.android.material.bottomnavigation.BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
-        bottomNav.setSelectedItemId(R.id.nav_home);
-        bottomNav.setOnItemSelectedListener(item -> {
+        // Drawer setup
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
+
+        // Menu button to open drawer
+        ImageButton btnMenu = findViewById(R.id.btn_menu);
+        btnMenu.setOnClickListener(v -> drawerLayout.openDrawer(GravityCompat.START));
+
+        // Set user info in nav header
+        View headerView = navigationView.getHeaderView(0);
+        TextView navUserName = headerView.findViewById(R.id.nav_user_name);
+        TextView navUserEmail = headerView.findViewById(R.id.nav_user_email);
+        ImageView navProfileImage = headerView.findViewById(R.id.nav_profile_image);
+
+        if (mAuth.getCurrentUser() != null) {
+            String userId = mAuth.getCurrentUser().getUid();
+
+            // Load user data from Firebase Database
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId);
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        String name = snapshot.child("name").getValue(String.class);
+                        String email = snapshot.child("email").getValue(String.class);
+                        String photoBase64 = snapshot.child("photoBase64").getValue(String.class);
+
+                        navUserName.setText(name != null ? name : "User");
+                        navUserEmail.setText(email != null ? email : mAuth.getCurrentUser().getEmail());
+
+                        // Load profile picture from Base64
+                        if (photoBase64 != null && !photoBase64.isEmpty()) {
+                            try {
+                                byte[] decodedBytes = Base64.decode(photoBase64, Base64.DEFAULT);
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                                navProfileImage.setImageBitmap(bitmap);
+                            } catch (Exception e) {
+                                navProfileImage.setImageResource(R.drawable.ic_profile);
+                            }
+                        } else {
+                            navProfileImage.setImageResource(R.drawable.ic_profile);
+                        }
+                    } else {
+                        navUserName.setText(mAuth.getCurrentUser().getDisplayName() != null ?
+                                mAuth.getCurrentUser().getDisplayName() : "User");
+                        navUserEmail.setText(mAuth.getCurrentUser().getEmail());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    navUserName.setText(mAuth.getCurrentUser().getDisplayName() != null ?
+                            mAuth.getCurrentUser().getDisplayName() : "User");
+                    navUserEmail.setText(mAuth.getCurrentUser().getEmail());
+                }
+            });
+        }
+
+        // Make profile image clickable to change picture
+        navProfileImage.setOnClickListener(v -> {
+            // Open image picker or profile activity
+            startActivity(new Intent(this, ProfileActivity.class));
+        });
+
+        // Navigation drawer item click
+        navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
-            if (id == R.id.nav_home) {
-                return true;
-            } else if (id == R.id.nav_settings) {
-                startActivity(new Intent(this, SettingsActivity.class));
-                finish();
-                return true;
-            } else if (id == R.id.nav_profile) {
+
+            if (id == R.id.nav_drawer_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
-                finish();
-                return true;
-            } else if (id == R.id.nav_logout) {
+            } else if (id == R.id.nav_drawer_settings) {
+                startActivity(new Intent(this, SettingsActivity.class));
+            } else if (id == R.id.nav_drawer_logout) {
                 mAuth.signOut();
                 Intent intent = new Intent(this, LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
                 finish();
-                return true;
             }
-            return false;
+
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
         });
 
         // Navigation Buttons
@@ -300,6 +370,48 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
         super.onResume();
         // Background service handles all shake detection
         // No in-app shake detection needed
+
+        // Reload profile picture in navigation drawer
+        if (mAuth.getCurrentUser() != null && navigationView != null) {
+            String userId = mAuth.getCurrentUser().getUid();
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(userId);
+
+            View headerView = navigationView.getHeaderView(0);
+            ImageView navProfileImage = headerView.findViewById(R.id.nav_profile_image);
+            TextView navUserName = headerView.findViewById(R.id.nav_user_name);
+            TextView navUserEmail = headerView.findViewById(R.id.nav_user_email);
+
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        String name = snapshot.child("name").getValue(String.class);
+                        String email = snapshot.child("email").getValue(String.class);
+                        String photoBase64 = snapshot.child("photoBase64").getValue(String.class);
+
+                        navUserName.setText(name != null ? name : "User");
+                        navUserEmail.setText(email != null ? email : mAuth.getCurrentUser().getEmail());
+
+                        if (photoBase64 != null && !photoBase64.isEmpty()) {
+                            try {
+                                byte[] decodedBytes = Base64.decode(photoBase64, Base64.DEFAULT);
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                                navProfileImage.setImageBitmap(bitmap);
+                            } catch (Exception e) {
+                                navProfileImage.setImageResource(R.drawable.ic_profile);
+                            }
+                        } else {
+                            navProfileImage.setImageResource(R.drawable.ic_profile);
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError error) {
+                    // Keep existing values
+                }
+            });
+        }
     }
 
     @Override
@@ -343,6 +455,15 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
             Toast.makeText(this, "SMS permission denied.", Toast.LENGTH_LONG).show();
         } else if (requestCode == REQ_MIC_PERMISSION && (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED)) {
             Toast.makeText(this, "Mic permission denied. Voice detection won't work.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 }

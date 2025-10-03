@@ -30,7 +30,7 @@ public class SettingsActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupLayout(R.layout.activity_settings, "Settings", true, R.id.nav_settings);
+        setupLayout(R.layout.activity_settings, "Settings", true, R.id.nav_home);
 
         prefs = getSharedPreferences("AppSettingsPrefs", MODE_PRIVATE);
 

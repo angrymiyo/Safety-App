@@ -82,7 +82,7 @@ public class AIVoiceActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupLayout(R.layout.activity_aivoice, "Voice Detection", true, R.id.nav_settings);
+        setupLayout(R.layout.activity_aivoice, "Voice Detection", true, R.id.nav_home);
 
         // Initialize UI
         tvStatus = findViewById(R.id.tv_status);
