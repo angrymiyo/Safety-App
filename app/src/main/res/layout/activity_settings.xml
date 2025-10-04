@@ -1,54 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_gradient"
+    android:orientation="vertical"
     android:padding="20dp">
 
+    <!-- Header -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Settings"
+        android:textColor="@color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="2dp"
+        android:fontFamily="sans-serif"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Customize your safety preferences"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:alpha="0.85"
+        android:layout_marginBottom="20dp"
+        android:fontFamily="sans-serif-light"/>
+
+    <!-- Settings List -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Settings"
-            android:textColor="@color/white"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="sans-serif"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Customize your safety preferences"
-            android:textColor="@color/white"
-            android:textSize="14sp"
-            android:alpha="0.8"
-            android:layout_marginBottom="24dp"
-            android:fontFamily="sans-serif-light"/>
-
-        <!-- Sound Setting Card -->
+        <!-- Sound Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardElevation="3dp"
             app:cardBackgroundColor="@color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:padding="16dp">
 
                 <ImageView
                     android:layout_width="40dp"
@@ -61,8 +63,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Enable Beep Sound"
-                    android:textSize="16sp"
+                    android:text="Beep Sound"
+                    android:textSize="15sp"
                     android:textColor="@color/text_primary"
                     android:fontFamily="sans-serif-medium" />
 
@@ -76,24 +78,21 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Vibration -->
+        <!-- Vibration Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardElevation="3dp"
             app:cardBackgroundColor="@color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:padding="16dp">
 
                 <ImageView
                     android:layout_width="40dp"
@@ -106,8 +105,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Enable Vibration"
-                    android:textSize="16sp"
+                    android:text="Vibration"
+                    android:textSize="15sp"
                     android:textColor="@color/text_primary"
                     android:fontFamily="sans-serif-medium" />
 
@@ -121,24 +120,21 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Contact Access -->
+        <!-- Contact Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardElevation="3dp"
             app:cardBackgroundColor="@color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:padding="16dp">
 
                 <ImageView
                     android:layout_width="40dp"
@@ -151,8 +147,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Allow Contact Access"
-                    android:textSize="16sp"
+                    android:text="Contact Access"
+                    android:textSize="15sp"
                     android:textColor="@color/text_primary"
                     android:fontFamily="sans-serif-medium" />
 
@@ -165,24 +161,21 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Voice Detection -->
+        <!-- Voice Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardElevation="3dp"
             app:cardBackgroundColor="@color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:padding="16dp">
 
                 <ImageView
                     android:layout_width="40dp"
@@ -195,8 +188,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Enable Voice Detection"
-                    android:textSize="16sp"
+                    android:text="Voice Detection"
+                    android:textSize="15sp"
                     android:textColor="@color/text_primary"
                     android:fontFamily="sans-serif-medium" />
 
@@ -209,13 +202,13 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- SOS Trigger Count -->
+        <!-- Power Button Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardElevation="3dp"
             app:cardBackgroundColor="@color/white">
 
             <LinearLayout
@@ -236,8 +229,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Power Button Presses to Trigger SOS"
-                    android:textSize="16sp"
+                    android:text="Power Presses"
+                    android:textSize="15sp"
                     android:textColor="@color/text_primary"
                     android:fontFamily="sans-serif-medium" />
 
@@ -245,18 +238,17 @@
                     android:id="@+id/spinner_press_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/text_primary"
+                    android:backgroundTint="@color/text_primary"
                     android:entries="@array/press_count_options" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Shake Count Setting Card -->
+        <!-- Shake Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
+            app:cardElevation="3dp"
             app:cardBackgroundColor="@color/white">
 
             <LinearLayout
@@ -277,8 +269,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Shakes to Trigger SOS"
-                    android:textSize="16sp"
+                    android:text="Shake Count"
+                    android:textSize="15sp"
                     android:textColor="@color/text_primary"
                     android:fontFamily="sans-serif-medium" />
 
@@ -287,11 +279,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:spinnerMode="dropdown"
-                    android:textColor="@color/text_primary"
+                    android:backgroundTint="@color/text_primary"
                     android:entries="@array/shake_count_options" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
-
     </LinearLayout>
-</ScrollView>
+
+</LinearLayout>
