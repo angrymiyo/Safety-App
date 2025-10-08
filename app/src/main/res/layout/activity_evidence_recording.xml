@@ -5,8 +5,8 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_gradient">
 
-    <!-- Camera Preview (hidden but functional) -->
-    <SurfaceView
+    <!-- Camera Preview using CameraX PreviewView -->
+    <androidx.camera.view.PreviewView
         android:id="@+id/camera_preview"
         android:layout_width="1dp"
         android:layout_height="1dp"

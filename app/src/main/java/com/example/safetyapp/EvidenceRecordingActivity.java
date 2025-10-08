@@ -3,7 +3,6 @@ package com.example.safetyapp;
 import android.Manifest;
 import android.content.ContentValues;
 import android.content.pm.PackageManager;
-import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,11 +19,25 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.Preview;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.video.FallbackStrategy;
+import androidx.camera.video.MediaStoreOutputOptions;
+import androidx.camera.video.Quality;
+import androidx.camera.video.QualitySelector;
+import androidx.camera.video.Recorder;
+import androidx.camera.video.Recording;
+import androidx.camera.video.VideoCapture;
+import androidx.camera.video.VideoRecordEvent;
+import androidx.camera.view.PreviewView;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.safetyapp.helper.FaceDetectionHelper;
 import com.example.safetyapp.service.EvidenceUploadService;
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -33,20 +46,26 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class EvidenceRecordingActivity extends AppCompatActivity {
 
     private static final String TAG = "EvidenceRecording";
     private static final int RECORD_DURATION_MS = 60000; // 1 minute for testing (change to 300000 for 5 min)
-    private static final int REQ_CAMERA_AUDIO = 100;
+    private static final int REQ_PERMISSIONS = 100;
 
-    private MediaRecorder mediaRecorder;
+    // CameraX
+    private PreviewView previewView;
+    private VideoCapture<Recorder> videoCapture;
+    private Recording currentRecording;
+    private ExecutorService cameraExecutor;
+
     private String outputFilePath;
-    private Uri galleryAudioUri;
+    private Uri savedVideoUri;
     private boolean isRecording = false;
     private Handler handler = new Handler();
     private Runnable autoStopRunnable;
@@ -78,6 +97,9 @@ public class EvidenceRecordingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_evidence_recording);
 
+        // Initialize camera executor
+        cameraExecutor = Executors.newSingleThreadExecutor();
+
         // Initialize UI elements
         initializeUI();
 
@@ -85,11 +107,12 @@ public class EvidenceRecordingActivity extends AppCompatActivity {
         if (!hasRequiredPermissions()) {
             requestPermissions();
         } else {
-            initializeRecording();
+            initializeCamera();
         }
     }
 
     private void initializeUI() {
+        previewView = findViewById(R.id.camera_preview);
         tvTimer = findViewById(R.id.tv_timer);
         tvRecordingStatus = findViewById(R.id.tv_recording_status);
         tvUploadPercentage = findViewById(R.id.tv_upload_percentage);
@@ -126,7 +149,7 @@ public class EvidenceRecordingActivity extends AppCompatActivity {
 
         // Stop recording button click
         btnStopRecording.setOnClickListener(v -> stopRecording());
-        btnStopRecording.setVisibility(View.VISIBLE); // Make button visible
+        btnStopRecording.setVisibility(View.VISIBLE);
 
         // Get emergency contacts count
         updateContactsCount();
@@ -137,128 +160,168 @@ public class EvidenceRecordingActivity extends AppCompatActivity {
     }
 
     private boolean hasRequiredPermissions() {
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED &&
+               ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestPermissions() {
         ActivityCompat.requestPermissions(this,
                 new String[]{
+                        Manifest.permission.CAMERA,
                         Manifest.permission.RECORD_AUDIO
-                }, REQ_CAMERA_AUDIO);
+                }, REQ_PERMISSIONS);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQ_CAMERA_AUDIO) {
+        if (requestCode == REQ_PERMISSIONS) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                initializeRecording();
+                initializeCamera();
             } else {
-                Toast.makeText(this, "Audio recording permission required", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Camera and audio permissions required", Toast.LENGTH_SHORT).show();
                 finish();
             }
         }
     }
 
-    private void initializeRecording() {
-        // Start audio recording immediately
-        startRecording();
+    private void initializeCamera() {
+        ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+
+        cameraProviderFuture.addListener(() -> {
+            try {
+                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                bindCamera(cameraProvider);
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to get camera provider: " + e.getMessage());
+                Toast.makeText(this, "Failed to initialize camera", Toast.LENGTH_SHORT).show();
+            }
+        }, ContextCompat.getMainExecutor(this));
+    }
+
+    private void bindCamera(ProcessCameraProvider cameraProvider) {
+        // Preview
+        Preview preview = new Preview.Builder().build();
+        preview.setSurfaceProvider(previewView.getSurfaceProvider());
+
+        // Video capture with high quality
+        Recorder recorder = new Recorder.Builder()
+                .setQualitySelector(QualitySelector.from(
+                        Quality.HD,
+                        FallbackStrategy.higherQualityOrLowerThan(Quality.SD)))
+                .build();
+
+        videoCapture = VideoCapture.withOutput(recorder);
+
+        // Select back camera
+        CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
+
+        try {
+            // Unbind all use cases before rebinding
+            cameraProvider.unbindAll();
+
+            // Bind use cases to camera
+            cameraProvider.bindToLifecycle(
+                    this,
+                    cameraSelector,
+                    preview,
+                    videoCapture);
+
+            Log.d(TAG, "Camera bound successfully");
+
+            // Start recording immediately after camera is ready
+            startRecording();
+
+        } catch (Exception e) {
+            Log.e(TAG, "Camera binding failed: " + e.getMessage());
+            Toast.makeText(this, "Failed to start camera", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void startRecording() {
+        if (videoCapture == null) {
+            Log.e(TAG, "VideoCapture not initialized");
+            return;
+        }
+
         try {
-            Log.d(TAG, "=== Starting AUDIO recording ===");
+            Log.d(TAG, "=== Starting VIDEO recording ===");
 
             // Create output file
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-            String fileName = "EVIDENCE_AUDIO_" + timeStamp + ".m4a";
+            String fileName = "EVIDENCE_VIDEO_" + timeStamp + ".mp4";
 
-            // Record to app's external files directory (reliable)
-            File outputDir = new File(getExternalFilesDir(null), "Evidence");
-            if (!outputDir.exists()) {
-                outputDir.mkdirs();
-            }
-            File outputFile = new File(outputDir, fileName);
-            outputFilePath = outputFile.getAbsolutePath();
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MediaStore.Video.Media.DISPLAY_NAME, fileName);
+            contentValues.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
 
-            Log.d(TAG, "Recording to: " + outputFilePath);
-
-            // Setup MediaRecorder
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                mediaRecorder = new MediaRecorder(this);
-            } else {
-                mediaRecorder = new MediaRecorder();
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                contentValues.put(MediaStore.Video.Media.RELATIVE_PATH,
+                        Environment.DIRECTORY_MOVIES + "/Safety Evidence");
             }
 
-            // Set audio source ONLY (no video/camera)
-            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            Log.d(TAG, "Audio source set");
+            MediaStoreOutputOptions outputOptions = new MediaStoreOutputOptions.Builder(
+                    getContentResolver(),
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
+                    .setContentValues(contentValues)
+                    .build();
 
-            // Set output format and encoder for audio
-            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-            Log.d(TAG, "Format and encoder set");
+            // Start recording with audio enabled
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                currentRecording = videoCapture.getOutput()
+                        .prepareRecording(this, outputOptions)
+                        .withAudioEnabled()
+                        .start(ContextCompat.getMainExecutor(this), videoRecordEvent -> {
+                            if (videoRecordEvent instanceof VideoRecordEvent.Start) {
+                                Log.d(TAG, "✓ Video recording started successfully!");
+                                isRecording = true;
 
-            // Set audio quality
-            mediaRecorder.setAudioEncodingBitRate(128000);
-            mediaRecorder.setAudioSamplingRate(44100);
-            Log.d(TAG, "Audio quality set");
+                                // Start timer
+                                recordingStartTime = System.currentTimeMillis();
+                                handler.post(timerRunnable);
 
-            // Set output file
-            mediaRecorder.setOutputFile(outputFilePath);
-            Log.d(TAG, "Output file set");
+                                // Update UI
+                                runOnUiThread(() -> {
+                                    tvRecordingStatus.setText("● Recording");
+                                    tvUploadStatus.setText("Recording video evidence...");
+                                    Toast.makeText(this, "Video Evidence Recording Started", Toast.LENGTH_SHORT).show();
+                                });
 
-            // Set max duration
-            mediaRecorder.setMaxDuration(RECORD_DURATION_MS);
+                                // Auto-stop after max duration
+                                autoStopRunnable = this::stopRecording;
+                                handler.postDelayed(autoStopRunnable, RECORD_DURATION_MS);
 
-            mediaRecorder.setOnInfoListener((mr, what, extra) -> {
-                if (what == MediaRecorder.MEDIA_RECORDER_INFO_MAX_DURATION_REACHED) {
-                    Log.d(TAG, "Max duration reached, stopping recording");
-                    stopRecording();
-                }
-            });
+                            } else if (videoRecordEvent instanceof VideoRecordEvent.Finalize) {
+                                VideoRecordEvent.Finalize finalizeEvent = (VideoRecordEvent.Finalize) videoRecordEvent;
 
-            mediaRecorder.setOnErrorListener((mr, what, extra) -> {
-                Log.e(TAG, "MediaRecorder error: what=" + what + " extra=" + extra);
-                runOnUiThread(() -> {
-                    Toast.makeText(this, "Recording error: " + what, Toast.LENGTH_LONG).show();
-                });
-                stopRecording();
-            });
+                                if (!finalizeEvent.hasError()) {
+                                    savedVideoUri = finalizeEvent.getOutputResults().getOutputUri();
+                                    Log.d(TAG, "Video saved to: " + savedVideoUri);
 
-            // Prepare MediaRecorder
-            Log.d(TAG, "Preparing MediaRecorder...");
-            mediaRecorder.prepare();
-            Log.d(TAG, "MediaRecorder prepared");
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(this, "Video saved to Gallery", Toast.LENGTH_SHORT).show();
+                                        tvRecordingStatus.setText("● Processing");
+                                        tvUploadStatus.setText("Preparing upload...");
+                                    });
 
-            // Start recording
-            Log.d(TAG, "Starting MediaRecorder...");
-            mediaRecorder.start();
-            isRecording = true;
-            Log.d(TAG, "✓ Audio recording started successfully!");
+                                    // Upload and share evidence
+                                    uploadAndShareEvidence();
 
-            // Start timer
-            recordingStartTime = System.currentTimeMillis();
-            handler.post(timerRunnable);
-
-            // Update UI
-            tvRecordingStatus.setText("● Recording");
-            tvUploadStatus.setText("Recording in progress...");
-            Toast.makeText(this, "Audio Evidence Recording Started", Toast.LENGTH_SHORT).show();
-
-            Log.d(TAG, "Audio recording started: " + outputFilePath);
-
-            // Auto-stop after max duration with stronger handler
-            autoStopRunnable = this::stopRecording;
-            handler.postDelayed(autoStopRunnable, RECORD_DURATION_MS + 1000);
+                                } else {
+                                    Log.e(TAG, "Video recording error: " + finalizeEvent.getError());
+                                    runOnUiThread(() -> {
+                                        Toast.makeText(this, "Recording error: " + finalizeEvent.getError(),
+                                                Toast.LENGTH_LONG).show();
+                                    });
+                                }
+                            }
+                        });
+            }
 
         } catch (Exception e) {
             Log.e(TAG, "Recording start failed: " + e.getMessage());
             e.printStackTrace();
             Toast.makeText(this, "Recording failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-
-            // Clean up on failure
-            releaseMediaRecorder();
             handler.postDelayed(this::finish, 2000);
         }
     }
@@ -266,160 +329,64 @@ public class EvidenceRecordingActivity extends AppCompatActivity {
     private void stopRecording() {
         Log.d(TAG, "stopRecording called, isRecording=" + isRecording);
 
-        if (!isRecording) {
+        if (!isRecording || currentRecording == null) {
             Log.d(TAG, "Not recording, ignoring stop request");
             return;
         }
 
-        if (mediaRecorder != null) {
-            try {
-                mediaRecorder.stop();
-                isRecording = false;
-                Log.d(TAG, "MediaRecorder stopped successfully");
-
-                // Stop timer and auto-stop handler
-                handler.removeCallbacks(timerRunnable);
-                if (autoStopRunnable != null) {
-                    handler.removeCallbacks(autoStopRunnable);
-                }
-
-                // Update UI
-                tvRecordingStatus.setText("● Processing");
-                tvUploadStatus.setText("Preparing upload...");
-
-                Log.d(TAG, "Recording stopped, file at: " + outputFilePath);
-
-                // Copy audio to gallery
-                copyAudioToGallery();
-
-                // Upload to cloud and share with contacts
-                uploadAndShareEvidence();
-
-            } catch (Exception e) {
-                Log.e(TAG, "Error stopping recording: " + e.getMessage());
-                e.printStackTrace();
-                isRecording = false;
-            }
-        }
-        releaseMediaRecorder();
-    }
-
-    private void copyAudioToGallery() {
         try {
-            File sourceFile = new File(outputFilePath);
-            if (!sourceFile.exists()) {
-                Log.e(TAG, "Source file doesn't exist: " + outputFilePath);
-                return;
+            currentRecording.stop();
+            currentRecording = null;
+            isRecording = false;
+
+            // Stop timer and auto-stop handler
+            handler.removeCallbacks(timerRunnable);
+            if (autoStopRunnable != null) {
+                handler.removeCallbacks(autoStopRunnable);
             }
 
-            String fileName = sourceFile.getName();
+            Log.d(TAG, "Recording stopped successfully");
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // Android 10+ - Use MediaStore
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.Audio.Media.DISPLAY_NAME, fileName);
-                values.put(MediaStore.Audio.Media.MIME_TYPE, "audio/mp4");
-                values.put(MediaStore.Audio.Media.RELATIVE_PATH, Environment.DIRECTORY_MUSIC + "/Safety Evidence");
-                values.put(MediaStore.Audio.Media.IS_PENDING, 1);
-
-                Uri uri = getContentResolver().insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, values);
-
-                if (uri != null) {
-                    // Copy file content
-                    try (java.io.InputStream in = new java.io.FileInputStream(sourceFile);
-                         java.io.OutputStream out = getContentResolver().openOutputStream(uri)) {
-
-                        byte[] buffer = new byte[8192];
-                        int bytesRead;
-                        while ((bytesRead = in.read(buffer)) != -1) {
-                            out.write(buffer, 0, bytesRead);
-                        }
-                        out.flush();
-                    }
-
-                    // Mark as completed
-                    values.clear();
-                    values.put(MediaStore.Audio.Media.IS_PENDING, 0);
-                    getContentResolver().update(uri, values, null, null);
-
-                    galleryAudioUri = uri;
-                    Log.d(TAG, "Audio copied to gallery: " + uri);
-                    Toast.makeText(this, "Audio saved to Music folder", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                // Android 9 and below - Copy to public directory
-                File musicDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC);
-                File evidenceDir = new File(musicDir, "Safety Evidence");
-                if (!evidenceDir.exists()) {
-                    evidenceDir.mkdirs();
-                }
-
-                File destFile = new File(evidenceDir, fileName);
-
-                try (java.io.FileInputStream in = new java.io.FileInputStream(sourceFile);
-                     java.io.FileOutputStream out = new java.io.FileOutputStream(destFile)) {
-
-                    byte[] buffer = new byte[8192];
-                    int bytesRead;
-                    while ((bytesRead = in.read(buffer)) != -1) {
-                        out.write(buffer, 0, bytesRead);
-                    }
-                }
-
-                // Scan file to make it visible
-                android.media.MediaScannerConnection.scanFile(
-                    this,
-                    new String[]{destFile.getAbsolutePath()},
-                    new String[]{"audio/mp4"},
-                    (path, uri) -> {
-                        Log.d(TAG, "Audio scanned to gallery: " + uri);
-                        galleryAudioUri = uri;
-                    }
-                );
-
-                Toast.makeText(this, "Audio saved to Music folder", Toast.LENGTH_SHORT).show();
-            }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to copy audio to gallery: " + e.getMessage());
+            Log.e(TAG, "Error stopping recording: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-
     private void uploadAndShareEvidence() {
+        if (savedVideoUri == null) {
+            Log.e(TAG, "No video URI available for upload");
+            return;
+        }
+
+        // Copy from MediaStore to temp file for upload
         File evidenceFile = null;
+        try {
+            String fileName = "temp_evidence_" + System.currentTimeMillis() + ".mp4";
+            evidenceFile = new File(getCacheDir(), fileName);
 
-        // Get file from Uri (Android 10+) or path (Android 9-)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && galleryAudioUri != null) {
-            // For Android 10+, we need to copy from MediaStore Uri to temp file for upload
-            try {
-                String fileName = "temp_evidence_" + System.currentTimeMillis() + ".m4a";
-                evidenceFile = new File(getCacheDir(), fileName);
+            java.io.InputStream inputStream = getContentResolver().openInputStream(savedVideoUri);
+            java.io.FileOutputStream outputStream = new java.io.FileOutputStream(evidenceFile);
 
-                java.io.InputStream inputStream = getContentResolver().openInputStream(galleryAudioUri);
-                java.io.FileOutputStream outputStream = new java.io.FileOutputStream(evidenceFile);
-
-                byte[] buffer = new byte[4096];
-                int bytesRead;
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    outputStream.write(buffer, 0, bytesRead);
-                }
-
-                inputStream.close();
-                outputStream.close();
-
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to copy file for upload: " + e.getMessage());
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
             }
-        } else if (outputFilePath != null) {
-            evidenceFile = new File(outputFilePath);
+
+            inputStream.close();
+            outputStream.close();
+
+            outputFilePath = evidenceFile.getAbsolutePath();
+
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to copy file for upload: " + e.getMessage());
+            return;
         }
 
         if (evidenceFile != null && evidenceFile.exists()) {
-            // Make evidenceFile effectively final for use in callback
             final File finalEvidenceFile = evidenceFile;
 
-            // Start upload service
             // Update UI - start upload
             tvRecordingStatus.setText("● Uploading");
             tvUploadStatus.setText("Uploading to secure cloud storage...");
@@ -437,7 +404,10 @@ public class EvidenceRecordingActivity extends AppCompatActivity {
                         progressUpload.setProgress(100);
                     });
 
-                    // Share with emergency contacts (skip face detection for audio)
+                    // Detect faces in the video
+                    detectFacesInEvidence(finalEvidenceFile);
+
+                    // Share with emergency contacts
                     shareWithEmergencyContacts(downloadUrl);
 
                     // Schedule auto-delete after 7 days
@@ -535,16 +505,17 @@ public class EvidenceRecordingActivity extends AppCompatActivity {
     private void sendEvidenceNotification(String phoneNumber, String downloadUrl) {
         // Create comprehensive evidence message
         StringBuilder message = new StringBuilder();
-        message.append("🚨 EMERGENCY AUDIO EVIDENCE RECORDED\n\n");
+        message.append("🚨 EMERGENCY VIDEO EVIDENCE RECORDED\n\n");
         message.append("⏰ Time: ").append(recordingTimestamp).append("\n");
 
         if (!recordingLocation.isEmpty()) {
             message.append("📍 Location: ").append(recordingLocation).append("\n");
         }
 
-        message.append("🎙️ Audio Duration: ").append(getRecordingDuration()).append("\n\n");
+        message.append("👤 Faces Detected: ").append(detectedFaceCount).append("\n");
+        message.append("📹 Video Duration: ").append(getRecordingDuration()).append("\n\n");
 
-        message.append("🔗 Listen to Evidence:\n").append(downloadUrl).append("\n\n");
+        message.append("🔗 View Evidence:\n").append(downloadUrl).append("\n\n");
 
         message.append("⚠️ IMPORTANT:\n");
         message.append("• Evidence stored securely for 7 days\n");
@@ -656,6 +627,37 @@ public class EvidenceRecordingActivity extends AppCompatActivity {
                 });
     }
 
+    private void detectFacesInEvidence(File videoFile) {
+        if (videoFile == null || !videoFile.exists()) {
+            Log.e(TAG, "Video file is null or doesn't exist for face detection");
+            detectedFaceCount = 0;
+            return;
+        }
+
+        Log.d(TAG, "Starting face detection on: " + videoFile.getAbsolutePath());
+        FaceDetectionHelper faceDetector = new FaceDetectionHelper(this);
+
+        faceDetector.detectFacesInVideo(videoFile, new FaceDetectionHelper.FaceDetectionCallback() {
+            @Override
+            public void onFacesDetected(int faceCount, java.util.List<com.google.mlkit.vision.face.Face> faces) {
+                detectedFaceCount = faceCount;
+                runOnUiThread(() -> {
+                    tvFaceCount.setText(String.valueOf(faceCount));
+                });
+                Log.d(TAG, "Faces detected in evidence: " + faceCount);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e(TAG, "Face detection failed: " + e.getMessage());
+                e.printStackTrace();
+                detectedFaceCount = 0;
+                runOnUiThread(() -> {
+                    tvFaceCount.setText("0");
+                });
+            }
+        });
+    }
 
     private void scheduleAutoDeletion(String downloadUrl) {
         // Store deletion timestamp in Firebase
@@ -672,19 +674,6 @@ public class EvidenceRecordingActivity extends AppCompatActivity {
         evidenceRef.child("deleteAt").setValue(deletionTime);
     }
 
-    private void releaseMediaRecorder() {
-        if (mediaRecorder != null) {
-            try {
-                mediaRecorder.reset();
-                mediaRecorder.release();
-                mediaRecorder = null;
-                Log.d(TAG, "MediaRecorder released");
-            } catch (Exception e) {
-                Log.e(TAG, "Error releasing MediaRecorder: " + e.getMessage());
-            }
-        }
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -695,7 +684,9 @@ public class EvidenceRecordingActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         handler.removeCallbacksAndMessages(null);
-        releaseMediaRecorder();
+        if (cameraExecutor != null) {
+            cameraExecutor.shutdown();
+        }
     }
 
     @Override
