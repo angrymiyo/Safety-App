@@ -314,6 +314,14 @@ public class EmergencyMessageHelper {
         });
     }
 
+    public void sendCustomMessageToNumber(String phoneNumber, String message) {
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.SEND_SMS)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        sendSms(phoneNumber, message);
+    }
+
     public void postToFacebookFeed(String message) {
         if (ShareDialog.canShow(ShareLinkContent.class)) {
             ShareLinkContent content = new ShareLinkContent.Builder()

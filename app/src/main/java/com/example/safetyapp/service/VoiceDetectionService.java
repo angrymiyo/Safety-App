@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 
+import com.example.safetyapp.EvidenceRecordingActivity;
 import com.example.safetyapp.R;
 import com.example.safetyapp.helper.EmergencyMessageHelperService;
 import com.example.safetyapp.helper.PersonalizedVoiceHelper;
@@ -297,6 +298,11 @@ public class VoiceDetectionService extends Service {
             wakeLock.acquire(COOLDOWN_MS);
             Log.i(TAG, "WakeLock acquired for emergency");
         }
+
+        // Start evidence recording
+        Intent evidenceIntent = new Intent(this, EvidenceRecordingActivity.class);
+        evidenceIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(evidenceIntent);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED ||
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

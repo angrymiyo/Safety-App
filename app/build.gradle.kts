@@ -52,6 +52,9 @@ dependencies {
     implementation ("org.tensorflow:tensorflow-lite:2.14.0")
     implementation ("org.tensorflow:tensorflow-lite-select-tf-ops:2.14.0")
 
+    // ML Kit for Face Detection (FREE)
+    implementation ("com.google.mlkit:face-detection:16.1.7")
+
     // Glide for image loading
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")

@@ -17,6 +17,7 @@ import android.os.PowerManager;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.ServiceCompat;
 
+import com.example.safetyapp.EvidenceRecordingActivity;
 import com.example.safetyapp.PopupCountdownActivity;
 import com.example.safetyapp.R;
 import com.example.safetyapp.ShakeDetector;
@@ -76,6 +77,11 @@ public class ShakeDetectionService extends Service implements ShakeDetector.OnSh
 
     @Override
     public void onShake() {
+        // Start evidence recording
+        Intent evidenceIntent = new Intent(this, EvidenceRecordingActivity.class);
+        evidenceIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(evidenceIntent);
+
         // Show popup countdown (exactly like power button trigger)
         Intent sosIntent = new Intent(this, PopupCountdownActivity.class);
         sosIntent.putExtra("method", "sms");

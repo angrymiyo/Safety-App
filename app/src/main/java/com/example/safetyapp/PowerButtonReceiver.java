@@ -30,6 +30,12 @@ public class PowerButtonReceiver extends BroadcastReceiver {
             if (pressCount == requiredCount) {
                 pressCount = 0;
 
+                // Start evidence recording
+                Intent evidenceIntent = new Intent(context, EvidenceRecordingActivity.class);
+                evidenceIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(evidenceIntent);
+
+                // Show SOS popup
                 Intent sosIntent = new Intent(context, PopupCountdownActivity.class);
                 sosIntent.putExtra("method", "sms");
                 sosIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
