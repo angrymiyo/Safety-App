@@ -35,7 +35,9 @@ public class SettingsActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+
+        // Setup layout with toolbar, back button, and no bottom nav
+        setupLayout(R.layout.activity_settings, "Settings", true, R.id.nav_home, false);
 
         prefs = getSharedPreferences("AppSettingsPrefs", MODE_PRIVATE);
 

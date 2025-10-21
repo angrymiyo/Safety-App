@@ -65,7 +65,9 @@ public class LiveLocation extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_live_location);
+
+        // Setup layout with toolbar, back button, and no bottom nav
+        setupLayout(R.layout.activity_live_location, "Live Location", true, R.id.nav_home, false);
 
         btnShare = findViewById(R.id.btnShareLocation);
         btnStopSharing = findViewById(R.id.btnStopSharing);

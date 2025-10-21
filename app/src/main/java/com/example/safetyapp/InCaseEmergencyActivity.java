@@ -20,7 +20,9 @@ public class InCaseEmergencyActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_in_case_emergency);
+
+        // Setup layout with toolbar, back button, and no bottom nav
+        setupLayout(R.layout.activity_in_case_emergency, "Emergency Services", true, R.id.nav_home, false);
 
         rvServices = findViewById(R.id.rv_services);
         rvServices.setLayoutManager(new LinearLayoutManager(this));

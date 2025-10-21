@@ -22,7 +22,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.safetyapp.helper.PersonalizedVoiceHelper;
 
@@ -37,7 +36,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
-public class VoiceEnrollmentActivity extends AppCompatActivity {
+public class VoiceEnrollmentActivity extends BaseActivity {
 
     private static final int SAMPLE_RATE = 16000;
     private static final int RECORD_DURATION_MS = 975; // match YAMNet
@@ -60,7 +59,9 @@ public class VoiceEnrollmentActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_voice_enrollment);
+
+        // Setup layout with toolbar, back button, and no bottom nav
+        setupLayout(R.layout.activity_voice_enrollment, "Voice Enrollment", true, R.id.nav_home, false);
 
         statusText = findViewById(R.id.tv_enroll_instruction);
         enrollButton = findViewById(R.id.btn_start_enrollment);

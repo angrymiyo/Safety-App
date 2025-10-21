@@ -90,7 +90,9 @@ public class AIVoiceActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_aivoice);
+
+        // Setup layout with toolbar, back button, and no bottom nav
+        setupLayout(R.layout.activity_aivoice, "AI Voice Guardian", true, R.id.nav_home, false);
 
         // Initialize UI
         tvStatus = findViewById(R.id.tv_status);

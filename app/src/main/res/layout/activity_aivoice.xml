@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="12dp">
+            android:padding="10dp">
 
             <!-- Header Section -->
             <LinearLayout
@@ -27,14 +27,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:paddingTop="8dp"
-                android:paddingBottom="12dp">
+                android:paddingTop="6dp"
+                android:paddingBottom="8dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="🎙️ AI Voice Guardian"
-                    android:textSize="22sp"
+                    android:textSize="20sp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:shadowColor="#40000000"
@@ -43,20 +43,20 @@
                     android:shadowRadius="4"/>
             </LinearLayout>
 
-            <!-- Main Voice Visualization Card -->
+            <!-- Main Voice Visualization Card - REDUCED -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="5dp"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp"
+                    android:padding="12dp"
                     android:gravity="center">
 
                     <!-- Status Indicator -->
@@ -65,12 +65,12 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                        android:layout_marginBottom="8dp">
 
                         <View
                             android:id="@+id/status_indicator"
-                            android:layout_width="10dp"
-                            android:layout_height="10dp"
+                            android:layout_width="9dp"
+                            android:layout_height="9dp"
                             android:background="@drawable/circle_pulse"
                             android:backgroundTint="#4CAF50"/>
 
@@ -79,20 +79,20 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Listening Status"
-                            android:textSize="13sp"
+                            android:textSize="12sp"
                             android:textColor="#1A237E"
                             android:textStyle="bold"
-                            android:layout_marginStart="8dp"/>
+                            android:layout_marginStart="7dp"/>
 
                         <TextView
                             android:id="@+id/tv_listening_status"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Active"
-                            android:textSize="11sp"
+                            android:textSize="10sp"
                             android:textColor="#4CAF50"
                             android:textStyle="bold"
-                            android:paddingHorizontal="8dp"
+                            android:paddingHorizontal="7dp"
                             android:paddingVertical="2dp"
                             android:background="@drawable/badge_background"
                             android:backgroundTint="#E8F5E9"/>
@@ -103,7 +103,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginBottom="8dp"
                         android:gravity="center">
 
                         <!-- Distress Level -->
@@ -113,16 +113,16 @@
                             android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="8dp"
+                            android:padding="7dp"
                             android:background="@drawable/stat_card_background"
-                            android:layout_marginEnd="6dp">
+                            android:layout_marginEnd="5dp">
 
                             <TextView
                                 android:id="@+id/tv_scream_prob"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0%"
-                                android:textSize="16sp"
+                                android:textSize="15sp"
                                 android:textColor="#E53935"
                                 android:textStyle="bold"/>
 
@@ -142,16 +142,16 @@
                             android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="8dp"
+                            android:padding="7dp"
                             android:background="@drawable/stat_card_background"
-                            android:layout_marginStart="6dp">
+                            android:layout_marginStart="5dp">
 
                             <TextView
                                 android:id="@+id/tv_voice_match"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="—"
-                                android:textSize="16sp"
+                                android:textSize="15sp"
                                 android:textColor="#1E88E5"
                                 android:textStyle="bold"/>
 
@@ -165,12 +165,12 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <!-- Voice Wave Animation Container -->
+                    <!-- Voice Wave Animation Container - REDUCED -->
                     <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="100dp"
+                        android:layout_height="80dp"
                         android:background="@drawable/voice_wave_background"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="8dp">
 
                         <include layout="@layout/voice_wave_animation"/>
 
@@ -184,12 +184,12 @@
 
                             <ImageView
                                 android:id="@+id/iv_microphone"
-                                android:layout_width="50dp"
-                                android:layout_height="50dp"
+                                android:layout_width="42dp"
+                                android:layout_height="42dp"
                                 android:src="@drawable/ic_microphone"
                                 android:tint="#5E35B1"
-                                android:elevation="6dp"
-                                android:padding="10dp"
+                                android:elevation="5dp"
+                                android:padding="9dp"
                                 android:background="@drawable/circle_white_shadow"/>
 
                             <TextView
@@ -197,10 +197,10 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0%"
-                                android:textSize="12sp"
+                                android:textSize="11sp"
                                 android:textColor="#5E35B1"
                                 android:textStyle="bold"
-                                android:layout_marginTop="4dp"/>
+                                android:layout_marginTop="3dp"/>
                         </LinearLayout>
                     </FrameLayout>
 
@@ -210,15 +210,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_marginBottom="10dp">
+                        android:layout_marginBottom="8dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Audio Level"
-                            android:textSize="10sp"
+                            android:textSize="9sp"
                             android:textColor="#78909C"
-                            android:layout_marginBottom="3dp"/>
+                            android:layout_marginBottom="2dp"/>
 
                         <ProgressBar
                             android:id="@+id/progress_bar"
@@ -238,21 +238,21 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="⚡ Listening for emergency keywords"
-                        android:textSize="11sp"
+                        android:textSize="10sp"
                         android:textColor="#546E7A"
                         android:gravity="center"
-                        android:minHeight="24dp"/>
+                        android:minHeight="20dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- English Keywords Card (Expandable) -->
+            <!-- English Keywords Card (Expandable) - REDUCED -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/card_english_keywords"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="11dp"
+                app:cardElevation="3dp"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
@@ -267,7 +267,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:padding="14dp"
+                        android:padding="12dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
@@ -276,8 +276,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🇬🇧"
-                            android:textSize="20sp"
-                            android:layout_marginEnd="8dp"/>
+                            android:textSize="18sp"
+                            android:layout_marginEnd="7dp"/>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -289,7 +289,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="English Keywords"
-                                android:textSize="13sp"
+                                android:textSize="12sp"
                                 android:textColor="#1976D2"
                                 android:textStyle="bold"/>
 
@@ -297,15 +297,15 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Tap to view all 28 keywords"
-                                android:textSize="10sp"
+                                android:textSize="9sp"
                                 android:textColor="#78909C"
                                 android:layout_marginTop="1dp"/>
                         </LinearLayout>
 
                         <ImageView
                             android:id="@+id/icon_expand_english"
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:src="@drawable/ic_expand_more"
                             android:tint="#1976D2"/>
                     </LinearLayout>
@@ -316,7 +316,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp"
+                        android:padding="16dp"
                         android:paddingTop="0dp"
                         android:visibility="gone">
 
@@ -325,87 +325,87 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🆘 Common SOS / Help"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
                             android:textColor="#1976D2"
                             android:textStyle="bold"
-                            android:layout_marginBottom="6dp"/>
+                            android:layout_marginBottom="5dp"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="help • save me • please help • i'm in danger • sos • call the police • emergency • someone please • i need help • don't hurt me"
-                            android:textSize="13sp"
+                            android:textSize="12sp"
                             android:textColor="#546E7A"
-                            android:lineSpacingExtra="3dp"
-                            android:layout_marginBottom="16dp"/>
+                            android:lineSpacingExtra="2dp"
+                            android:layout_marginBottom="12dp"/>
 
                         <!-- Fear/Panic -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="😱 Fear / Panic"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
                             android:textColor="#1976D2"
                             android:textStyle="bold"
-                            android:layout_marginBottom="6dp"/>
+                            android:layout_marginBottom="5dp"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="i'm scared • i'm afraid • please don't • oh my god • what's happening • no no no • i can't breathe • stay away from me"
-                            android:textSize="13sp"
+                            android:textSize="12sp"
                             android:textColor="#546E7A"
-                            android:lineSpacingExtra="3dp"
-                            android:layout_marginBottom="16dp"/>
+                            android:lineSpacingExtra="2dp"
+                            android:layout_marginBottom="12dp"/>
 
                         <!-- Attack/Threat -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="⚠️ Attack / Threat"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
                             android:textColor="#1976D2"
                             android:textStyle="bold"
-                            android:layout_marginBottom="6dp"/>
+                            android:layout_marginBottom="5dp"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="he's hitting me • they're attacking me • someone is following me • he's trying to kidnap me • i'm trapped"
-                            android:textSize="13sp"
+                            android:textSize="12sp"
                             android:textColor="#546E7A"
-                            android:lineSpacingExtra="3dp"
-                            android:layout_marginBottom="16dp"/>
+                            android:lineSpacingExtra="2dp"
+                            android:layout_marginBottom="12dp"/>
 
                         <!-- Emotional Distress -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="💔 Emotional Distress"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
                             android:textColor="#1976D2"
                             android:textStyle="bold"
-                            android:layout_marginBottom="6dp"/>
+                            android:layout_marginBottom="5dp"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="i can't take it anymore • i'm not okay • i'm tired of everything • i want to disappear • please someone listen"
-                            android:textSize="13sp"
+                            android:textSize="12sp"
                             android:textColor="#546E7A"
-                            android:lineSpacingExtra="3dp"/>
+                            android:lineSpacingExtra="2dp"/>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Bangla Keywords Card (Expandable) -->
+            <!-- Bangla Keywords Card (Expandable) - REDUCED -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/card_bangla_keywords"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="11dp"
+                app:cardElevation="3dp"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
@@ -420,7 +420,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:padding="14dp"
+                        android:padding="12dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
@@ -429,8 +429,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🇧🇩"
-                            android:textSize="20sp"
-                            android:layout_marginEnd="8dp"/>
+                            android:textSize="18sp"
+                            android:layout_marginEnd="7dp"/>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -442,7 +442,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Bangla Keywords"
-                                android:textSize="13sp"
+                                android:textSize="12sp"
                                 android:textColor="#F57C00"
                                 android:textStyle="bold"/>
 
@@ -450,15 +450,15 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Tap to view all 28 keywords"
-                                android:textSize="10sp"
+                                android:textSize="9sp"
                                 android:textColor="#78909C"
                                 android:layout_marginTop="1dp"/>
                         </LinearLayout>
 
                         <ImageView
                             android:id="@+id/icon_expand_bangla"
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:src="@drawable/ic_expand_more"
                             android:tint="#F57C00"/>
                     </LinearLayout>
@@ -469,7 +469,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp"
+                        android:padding="16dp"
                         android:paddingTop="0dp"
                         android:visibility="gone">
 
@@ -478,75 +478,75 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🆘 সাধারণ SOS / সাহায্য"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
                             android:textColor="#F57C00"
                             android:textStyle="bold"
-                            android:layout_marginBottom="6dp"/>
+                            android:layout_marginBottom="5dp"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="বাঁচাও • সাহায্য করো • আমাকে বাঁচাও • আমি বিপদে আছি • পুলিশ ডাকো • কেউ আছো • আমি ভয় পাচ্ছি • আমার কিছু হবে • দয়া করে বাঁচাও • ওরা আমাকে মারবে"
-                            android:textSize="13sp"
+                            android:textSize="12sp"
                             android:textColor="#546E7A"
-                            android:lineSpacingExtra="3dp"
-                            android:layout_marginBottom="16dp"/>
+                            android:lineSpacingExtra="2dp"
+                            android:layout_marginBottom="12dp"/>
 
                         <!-- Fear/Panic -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="😱 ভয় / আতঙ্ক"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
                             android:textColor="#F57C00"
                             android:textStyle="bold"
-                            android:layout_marginBottom="6dp"/>
+                            android:layout_marginBottom="5dp"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="আমি ভয় পেয়েছি • দয়া করে না • হে আল্লাহ • এ কী হচ্ছে • না না না • দূরে থাকো • আমি পারছি না • আমাকে ছেড়ে দাও"
-                            android:textSize="13sp"
+                            android:textSize="12sp"
                             android:textColor="#546E7A"
-                            android:lineSpacingExtra="3dp"
-                            android:layout_marginBottom="16dp"/>
+                            android:lineSpacingExtra="2dp"
+                            android:layout_marginBottom="12dp"/>
 
                         <!-- Attack/Threat -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="⚠️ আক্রমণ / হুমকি"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
                             android:textColor="#F57C00"
                             android:textStyle="bold"
-                            android:layout_marginBottom="6dp"/>
+                            android:layout_marginBottom="5dp"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="ওরা আমাকে মারছে • ওরা আমার পেছনে • আমাকে তুলে নিচ্ছে • আমি আটকে গেছি • কেউ আমাকে অনুসরণ করছে"
-                            android:textSize="13sp"
+                            android:textSize="12sp"
                             android:textColor="#546E7A"
-                            android:lineSpacingExtra="3dp"
-                            android:layout_marginBottom="16dp"/>
+                            android:lineSpacingExtra="2dp"
+                            android:layout_marginBottom="12dp"/>
 
                         <!-- Emotional Distress -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="💔 মানসিক যন্ত্রণা"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
                             android:textColor="#F57C00"
                             android:textStyle="bold"
-                            android:layout_marginBottom="6dp"/>
+                            android:layout_marginBottom="5dp"/>
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="আর পারছি না • আমি ভালো নেই • সব কিছু শেষ হয়ে গেছে • আমি হারিয়ে যেতে চাই • কেউ শুনবে না আমাকে"
-                            android:textSize="13sp"
+                            android:textSize="12sp"
                             android:textColor="#546E7A"
-                            android:lineSpacingExtra="3dp"/>
+                            android:lineSpacingExtra="2dp"/>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -556,11 +556,65 @@
                 android:id="@+id/card_speech_recognition"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="11dp"
+                app:cardElevation="3dp"
                 app:cardBackgroundColor="#FFFFFF"
                 android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="10dp">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_speech_recognition"
+                            android:tint="#2196F3"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="You're saying..."
+                            android:textSize="14sp"
+                            android:textColor="#2196F3"
+                            android:textStyle="bold"
+                            android:layout_marginStart="9dp"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_recognized_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Listening..."
+                        android:textSize="15sp"
+                        android:textColor="#263238"
+                        android:minHeight="50dp"
+                        android:gravity="center_vertical"
+                        android:background="@drawable/speech_bubble_background"
+                        android:padding="14dp"
+                        android:lineSpacingExtra="3dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Voice Enrollment Card - REDUCED -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_voice_enrollment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#E3F2FD">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -573,70 +627,16 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="8dp">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_speech_recognition"
-                            android:tint="#2196F3"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="You're saying..."
-                            android:textSize="15sp"
-                            android:textColor="#2196F3"
-                            android:textStyle="bold"
-                            android:layout_marginStart="10dp"/>
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/tv_recognized_text"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Listening..."
-                        android:textSize="16sp"
-                        android:textColor="#263238"
-                        android:minHeight="60dp"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/speech_bubble_background"
-                        android:padding="16dp"
-                        android:lineSpacingExtra="4dp"/>
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
-
-            <!-- Voice Enrollment Card -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/card_voice_enrollment"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="6dp"
-                app:cardBackgroundColor="#E3F2FD">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="18dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
-
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
                             android:src="@drawable/ic_voice_enrollment"
                             android:tint="#1976D2"
-                            android:padding="6dp"
+                            android:padding="5dp"
                             android:background="@drawable/circle_white"
-                            android:layout_marginEnd="12dp"/>
+                            android:layout_marginEnd="10dp"/>
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -648,7 +648,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Voice Enrollment"
-                                android:textSize="15sp"
+                                android:textSize="14sp"
                                 android:textColor="#1976D2"
                                 android:textStyle="bold"
                                 android:layout_marginBottom="2dp"/>
@@ -658,7 +658,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Train AI to recognize your voice"
-                                android:textSize="11sp"
+                                android:textSize="10sp"
                                 android:textColor="#546E7A"
                                 android:lineSpacingExtra="1dp"/>
                         </LinearLayout>
@@ -667,14 +667,14 @@
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_enroll_voice"
                         android:layout_width="match_parent"
-                        android:layout_height="44dp"
+                        android:layout_height="40dp"
                         android:text="Enroll My Voice"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:textStyle="bold"
-                        app:cornerRadius="22dp"
+                        app:cornerRadius="20dp"
                         app:icon="@drawable/ic_fingerprint"
                         app:iconGravity="textStart"
-                        app:iconSize="18dp"
+                        app:iconSize="17dp"
                         app:backgroundTint="#1976D2"
                         android:textColor="@android:color/white"
                         android:elevation="3dp"/>
@@ -684,7 +684,7 @@
             <!-- Bottom Spacing -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="20dp"/>
+                android:layout_height="15dp"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
