@@ -47,7 +47,7 @@ public class ProfileActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupLayout(R.layout.activity_profile, "Profile", true, R.id.nav_profile, false);
+        setContentView(R.layout.activity_profile);
 
         // Initialize views
         usernameTextView = findViewById(R.id.username);

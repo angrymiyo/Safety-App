@@ -20,7 +20,7 @@ public class InCaseEmergencyActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupLayout(R.layout.activity_in_case_emergency, "Emergency Helplines", true,R.id.nav_home);
+        setContentView(R.layout.activity_in_case_emergency);
 
         rvServices = findViewById(R.id.rv_services);
         rvServices.setLayoutManager(new LinearLayoutManager(this));

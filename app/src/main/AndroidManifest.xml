@@ -35,6 +35,12 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.TURN_SCREEN_ON" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
     <application
         android:allowBackup="true"
@@ -126,7 +132,11 @@
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".PopupCountdownActivity"
-            android:theme="@style/Theme.AppCompat.Dialog" />
+            android:theme="@style/Theme.AppCompat.Dialog"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:launchMode="singleTop" />
         <activity
             android:name=".SettingsActivity"
             android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar" />
@@ -134,7 +144,10 @@
         <activity
             android:name=".EvidenceRecordingActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true" />
 
         <!-- Broadcast receiver -->
         <receiver
@@ -151,11 +164,7 @@
 
         <!-- Service -->
         <service
-            android:name="com.example.safetyapp.service.VoiceDetectionService"
-            android:foregroundServiceType="microphone"
-            android:exported="false" />
-        <service
-            android:name=".service.VoiceMonitorService"
+            android:name=".VoiceDetectionService"
             android:foregroundServiceType="microphone"
             android:exported="false" />
         <service

@@ -99,38 +99,42 @@ public class EmergencyMessageHelper {
     }
 
     public void sendMessage(String method) {
+        android.util.Log.i("EmergencyHelper", "========================================");
         android.util.Log.i("EmergencyHelper", "=== sendMessage() called ===");
+        android.util.Log.i("EmergencyHelper", "Method: " + method);
+        android.util.Log.i("EmergencyHelper", "========================================");
 
-        // Check location permission
+        // Check location permission (required for full SOS functionality)
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-            android.util.Log.w("EmergencyHelper", "Location permission not granted");
+            android.util.Log.w("EmergencyHelper", "❌ Location permission not granted - requesting...");
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_CODE);
             return;
         }
 
-        android.util.Log.i("EmergencyHelper", "Location permission granted");
+        android.util.Log.i("EmergencyHelper", "✅ Location permission granted");
 
-        // Check background location permission (Android 10+)
+        // Check background location permission (Android 10+) - required for continuous tracking
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                     != PackageManager.PERMISSION_GRANTED) {
-                android.util.Log.w("EmergencyHelper", "Background location permission not granted");
+                android.util.Log.w("EmergencyHelper", "❌ Background location permission not granted - requesting...");
                 ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, 103);
                 return;
             }
+            android.util.Log.i("EmergencyHelper", "✅ Background location permission granted");
         }
 
-        // Check SMS permission
+        // Check SMS permission (required for sending emergency messages)
         if (ContextCompat.checkSelfPermission(activity, Manifest.permission.SEND_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
-            android.util.Log.w("EmergencyHelper", "SMS permission not granted");
+            android.util.Log.w("EmergencyHelper", "❌ SMS permission not granted - requesting...");
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.SEND_SMS}, SMS_PERMISSION_CODE);
             return;
         }
 
-        android.util.Log.i("EmergencyHelper", "SMS permission granted");
-        android.util.Log.i("EmergencyHelper", "Loading emergency contacts from Firebase...");
+        android.util.Log.i("EmergencyHelper", "✅ SMS permission granted");
+        android.util.Log.i("EmergencyHelper", "✅ All permissions granted - proceeding to send emergency SMS with location tracking...");
 
         // Load contacts
         userRef.child("emergencyContacts").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -148,11 +152,14 @@ public class EmergencyMessageHelper {
                 android.util.Log.i("EmergencyHelper", "Total contacts loaded: " + contacts.size());
 
                 if (contacts.isEmpty()) {
-                    android.util.Log.e("EmergencyHelper", "No emergency contacts found in Firebase!");
-                    Toast.makeText(activity, "⚠️ No emergency contacts found. Please add contacts from Settings → Emergency Contacts", Toast.LENGTH_LONG).show();
+                    android.util.Log.e("EmergencyHelper", "❌ No emergency contacts found in Firebase!");
+                    Toast.makeText(activity, "❌ No emergency contacts found! Please add contacts from Settings → Emergency Contacts", Toast.LENGTH_LONG).show();
                     return;
                 }
 
+                android.util.Log.i("EmergencyHelper", "✅ Found " + contacts.size() + " emergency contact(s)");
+
+                // All permissions already verified - proceed with location tracking
                 // Generate unique share ID
                 shareId = currentUser.getUid() + "_" + System.currentTimeMillis();
                 isTracking = true;
@@ -183,14 +190,15 @@ public class EmergencyMessageHelper {
                     android.util.Log.e("EmergencyHelper", "Failed to start location tracking service", e);
                 }
 
-                // Get initial location and send message
-                android.util.Log.i("EmergencyHelper", "Getting current location...");
-                locationProvider.getLastLocation().addOnSuccessListener(location -> {
-                    if (location != null) {
-                        android.util.Log.i("EmergencyHelper", "Location obtained: " + location.getLatitude() + ", " + location.getLongitude());
+                // Get initial location and send message with tracking URL
+                if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    android.util.Log.i("EmergencyHelper", "Getting current location...");
+                    locationProvider.getLastLocation().addOnSuccessListener(location -> {
+                        if (location != null) {
+                            android.util.Log.i("EmergencyHelper", "Location obtained: " + location.getLatitude() + ", " + location.getLongitude());
 
-                        // Get saved emergency message
-                        userRef.child("emergency_message_template").addListenerForSingleValueEvent(new ValueEventListener() {
+                            // Get saved emergency message
+                            userRef.child("emergency_message_template").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot snapshot) {
                                 String savedMessage = snapshot.getValue(String.class);
@@ -262,13 +270,84 @@ public class EmergencyMessageHelper {
                 }).addOnFailureListener(e -> {
                     android.util.Log.e("EmergencyHelper", "Failed to get location", e);
                     Toast.makeText(activity, "⚠️ Location error - sending SMS without location", Toast.LENGTH_SHORT).show();
+
+                    // Send SMS without location as fallback
+                    sendEmergencySmsWithoutLocation();
                 });
+                }
             }
 
             @Override
             public void onCancelled(DatabaseError error) {
                 android.util.Log.e("EmergencyHelper", "Failed to load contacts from Firebase", error.toException());
                 Toast.makeText(activity, "❌ Failed to load emergency contacts from database", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    /**
+     * Send emergency SMS without location tracking
+     * Used when location permissions are not granted
+     */
+    private void sendEmergencySmsWithoutLocation() {
+        android.util.Log.i("EmergencyHelper", "Sending emergency SMS WITHOUT location tracking...");
+
+        // Get saved emergency message from Firebase
+        userRef.child("emergency_message_template").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                String savedMessage = snapshot.getValue(String.class);
+
+                // Use saved custom message or default
+                if (savedMessage == null || savedMessage.isEmpty()) {
+                    savedMessage = "🚨 EMERGENCY! I need help immediately!";
+                    android.util.Log.i("EmergencyHelper", "Using default emergency message (no location)");
+                } else {
+                    android.util.Log.i("EmergencyHelper", "Using custom emergency message (no location)");
+                }
+
+                String finalMessage = savedMessage + "\n\n⚠️ Note: Location tracking unavailable (permission not granted)";
+
+                android.util.Log.i("EmergencyHelper", "Final message: " + finalMessage);
+                android.util.Log.i("EmergencyHelper", "Sending to " + contacts.size() + " contacts...");
+
+                // Send SMS to all contacts
+                int successCount = 0;
+                for (Contact contact : contacts) {
+                    try {
+                        sendSms(contact.getPhone(), finalMessage);
+                        successCount++;
+                        android.util.Log.i("EmergencyHelper", "✅ SMS sent to: " + contact.getName() + " (" + contact.getPhone() + ")");
+                    } catch (Exception e) {
+                        android.util.Log.e("EmergencyHelper", "❌ Failed to send SMS to " + contact.getName(), e);
+                    }
+                }
+
+                android.util.Log.i("EmergencyHelper", "========================================");
+                android.util.Log.i("EmergencyHelper", "✅ SMS SENDING COMPLETE: " + successCount + "/" + contacts.size() + " sent successfully");
+                android.util.Log.i("EmergencyHelper", "========================================");
+
+                Toast.makeText(activity, "✅ Emergency SMS sent to " + successCount + " contacts", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                android.util.Log.e("EmergencyHelper", "Failed to load custom message - using default", error.toException());
+
+                // Send default message anyway
+                String defaultMessage = "🚨 EMERGENCY! I need help immediately!";
+
+                int successCount = 0;
+                for (Contact contact : contacts) {
+                    try {
+                        sendSms(contact.getPhone(), defaultMessage);
+                        successCount++;
+                    } catch (Exception e) {
+                        android.util.Log.e("EmergencyHelper", "Failed to send SMS", e);
+                    }
+                }
+
+                Toast.makeText(activity, "✅ Emergency SMS sent to " + successCount + " contacts", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -294,10 +373,10 @@ public class EmergencyMessageHelper {
             showSimpleNotification("Emergency SMS Sent", "Message sent to " + phone);
 
         } catch (SecurityException e) {
-            android.util.Log.e("EmergencyHelper", "SMS permission denied when sending to " + phone, e);
+            android.util.Log.e("EmergencyHelper", "❌ SMS permission denied when sending to " + phone, e);
             Toast.makeText(activity, "❌ SMS permission denied for " + phone, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            android.util.Log.e("EmergencyHelper", "Failed to send SMS to " + phone, e);
+            android.util.Log.e("EmergencyHelper", "❌ Failed to send SMS to " + phone, e);
             Toast.makeText(activity, "❌ Failed to send SMS to " + phone + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }

@@ -47,7 +47,7 @@ public class SaveSMSActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupLayout(R.layout.activity_save_sms, " Emergency Contacts & SMS", true,R.id.nav_home);
+        setContentView(R.layout.activity_save_sms);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {

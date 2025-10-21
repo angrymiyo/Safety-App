@@ -15,7 +15,7 @@ public class SafeZoneActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupLayout(R.layout.activity_safe_zone, "Safe Zone", true, R.id.nav_home);
+        setContentView(R.layout.activity_safe_zone);
 
         helper = new EmergencyMessageHelper(this);
 

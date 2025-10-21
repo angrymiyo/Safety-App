@@ -7,13 +7,17 @@ import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -80,21 +84,19 @@ public class AIVoiceActivity extends BaseActivity {
     private ProgressBar progressBar;
     private TextView tvScreamProb;
     private TextView tvVoiceMatch;
-    private TextView tvDetectionCount;
     private TextView tvEnrollmentStatus;
     private LinearLayout audioMeterContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupLayout(R.layout.activity_aivoice, "Voice Detection", true, R.id.nav_home);
+        setContentView(R.layout.activity_aivoice);
 
         // Initialize UI
         tvStatus = findViewById(R.id.tv_status);
         progressBar = findViewById(R.id.progress_bar);
         tvScreamProb = findViewById(R.id.tv_scream_prob);
         tvVoiceMatch = findViewById(R.id.tv_voice_match);
-        tvDetectionCount = findViewById(R.id.tv_detection_count);
         tvEnrollmentStatus = findViewById(R.id.tv_enrollment_status);
         audioMeterContainer = findViewById(R.id.audio_meter_container);
         Button enrollButton = findViewById(R.id.btn_enroll_voice);
@@ -104,6 +106,9 @@ public class AIVoiceActivity extends BaseActivity {
             Intent intent = new Intent(AIVoiceActivity.this, VoiceEnrollmentActivity.class);
             startActivity(intent);
         });
+
+        // Setup expandable keyword cards
+        setupExpandableKeywordCards();
 
         // Check if voice is enrolled
         updateEnrollmentStatus();
@@ -233,7 +238,6 @@ public class AIVoiceActivity extends BaseActivity {
                             tvScreamProb.setText("Ready");
                             tvScreamProb.setTextColor(0xFF4CAF50); // Green
                         }
-                        tvDetectionCount.setText("🎙️");
                     } else {
                         Log.d("KEYWORD_DETECTION", "⏸️ Not listening");
                         tvStatus.setText("⏸️ Speech recognition paused\nRestarting...");
@@ -417,9 +421,6 @@ public class AIVoiceActivity extends BaseActivity {
                 tvScreamProb.setTextColor(0xFF4CAF50); // Green
                 tvStatus.setText("✅ Listening for 40+ keywords\n📊 Distress % is display only");
             }
-
-            // Always show microphone icon (listening for keywords)
-            tvDetectionCount.setText("🎙️");
         });
 
         Log.d("ScreamDetection", "Distress: " + (int)(screamProbability * 100) + "% | Intensity (RMS): " + String.format("%.3f", rms));
@@ -560,7 +561,15 @@ public class AIVoiceActivity extends BaseActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == SMS_PERMISSION_CODE) {
+        if (requestCode == AUDIO_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Audio permission granted, start activity detection
+                initializeModelsAndStartDetection();
+            } else {
+                Toast.makeText(this, "Microphone permission denied - Voice detection disabled", Toast.LENGTH_SHORT).show();
+                tvStatus.setText("❌ Microphone permission denied");
+            }
+        } else if (requestCode == SMS_PERMISSION_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // SMS permission granted, check location permission
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -594,12 +603,12 @@ public class AIVoiceActivity extends BaseActivity {
                 runOnUiThread(() -> {
                     if (hasEnrolled) {
                         // Voice is enrolled - show success status, keep card visible for re-enrollment
-                        tvEnrollmentStatus.setText("✓ Voice enrolled successfully - Active 24/7\nYou can re-enroll anytime to update");
+                        tvEnrollmentStatus.setText("✓ Voice enrolled - You can re-enroll anytime");
                         tvEnrollmentStatus.setTextColor(0xFF4CAF50);
                     } else {
                         // Voice not enrolled - show enrollment prompt
-                        tvEnrollmentStatus.setText("⚠ Enroll your voice for personalized AI protection\nKeyword detection active");
-                        tvEnrollmentStatus.setTextColor(0xFFF44336);
+                        tvEnrollmentStatus.setText("Train AI to recognize your voice");
+                        tvEnrollmentStatus.setTextColor(0xFF546E7A);
                     }
                 });
             } catch (Exception e) {
@@ -608,19 +617,127 @@ public class AIVoiceActivity extends BaseActivity {
         }).start();
     }
 
+    private void setupExpandableKeywordCards() {
+        // English keywords card
+        LinearLayout headerEnglish = findViewById(R.id.header_english_keywords);
+        LinearLayout contentEnglish = findViewById(R.id.content_english_keywords);
+        ImageView iconExpandEnglish = findViewById(R.id.icon_expand_english);
+
+        // Bangla keywords card
+        LinearLayout headerBangla = findViewById(R.id.header_bangla_keywords);
+        LinearLayout contentBangla = findViewById(R.id.content_bangla_keywords);
+        ImageView iconExpandBangla = findViewById(R.id.icon_expand_bangla);
+
+        // Setup English card click listener
+        headerEnglish.setOnClickListener(v -> {
+            if (contentEnglish.getVisibility() == View.GONE) {
+                // Expand
+                contentEnglish.setVisibility(View.VISIBLE);
+                rotateIcon(iconExpandEnglish, 0f, 180f);
+            } else {
+                // Collapse
+                contentEnglish.setVisibility(View.GONE);
+                rotateIcon(iconExpandEnglish, 180f, 0f);
+            }
+        });
+
+        // Setup Bangla card click listener
+        headerBangla.setOnClickListener(v -> {
+            if (contentBangla.getVisibility() == View.GONE) {
+                // Expand
+                contentBangla.setVisibility(View.VISIBLE);
+                rotateIcon(iconExpandBangla, 0f, 180f);
+            } else {
+                // Collapse
+                contentBangla.setVisibility(View.GONE);
+                rotateIcon(iconExpandBangla, 180f, 0f);
+            }
+        });
+    }
+
+    private void rotateIcon(ImageView icon, float fromDegrees, float toDegrees) {
+        RotateAnimation rotate = new RotateAnimation(
+                fromDegrees, toDegrees,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+        );
+        rotate.setDuration(300);
+        rotate.setFillAfter(true);
+        icon.startAnimation(rotate);
+    }
+
+    private void startBackgroundService() {
+        Log.i("AIVoice", "Starting background voice detection service...");
+
+        try {
+            Intent serviceIntent = new Intent(this, VoiceDetectionService.class);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);
+            }
+
+            Log.i("AIVoice", "Background service started successfully - Monitoring continues when app is closed");
+        } catch (Exception e) {
+            Log.e("AIVoice", "Failed to start background service", e);
+        }
+    }
+
+    private void stopBackgroundService() {
+        Log.i("AIVoice", "Stopping background voice detection service...");
+
+        try {
+            Intent serviceIntent = new Intent(this, VoiceDetectionService.class);
+            stopService(serviceIntent);
+
+            Log.i("AIVoice", "Background service stopped");
+        } catch (Exception e) {
+            Log.e("AIVoice", "Failed to stop background service", e);
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         updateEnrollmentStatus();
+
+        // Stop background service when activity is visible
+        stopBackgroundService();
+
+        // Restart in-app detection if needed
+        SharedPreferences prefs = getSharedPreferences("AppSettingsPrefs", MODE_PRIVATE);
+        boolean voiceDetectionEnabled = prefs.getBoolean("voice_detection", false);
+
+        if (voiceDetectionEnabled && ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            if (phraseDetector == null || !isRecording) {
+                initializeModelsAndStartDetection();
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Start background service when activity goes to background
+        SharedPreferences prefs = getSharedPreferences("AppSettingsPrefs", MODE_PRIVATE);
+        boolean voiceDetectionEnabled = prefs.getBoolean("voice_detection", false);
+
+        if (voiceDetectionEnabled && ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            startBackgroundService();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
+        // Background service will take over when activity is destroyed
+        Log.i("AIVoice", "Activity destroyed - Background service will continue monitoring");
+
         isRecording = false;
         mainHandler.removeCallbacksAndMessages(null);
-        tvStatus.setText("Voice detection stopped");
 
         if (audioRecord != null) {
             audioRecord.stop();
@@ -629,7 +746,6 @@ public class AIVoiceActivity extends BaseActivity {
         if (phraseDetector != null) {
             phraseDetector.stopListening();
             phraseDetector.destroy();
-            Log.i("KEYWORD_DETECTION", "Keyword detector stopped and destroyed");
         }
         if (yamnetInterpreter != null) yamnetInterpreter.close();
         if (screamClassifierInterpreter != null) screamClassifierInterpreter.close();

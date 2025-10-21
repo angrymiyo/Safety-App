@@ -1,16 +1,20 @@
 package com.example.safetyapp;
 
 import android.Manifest;
+import android.app.KeyguardManager;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ProgressBar;
@@ -95,6 +99,10 @@ public class EvidenceRecordingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Setup lock screen display
+        setupLockScreenDisplay();
+
         setContentView(R.layout.activity_evidence_recording);
 
         // Initialize camera executor
@@ -157,6 +165,50 @@ public class EvidenceRecordingActivity extends AppCompatActivity {
         // Get current location and timestamp
         getCurrentLocation();
         recordingTimestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+    }
+
+    /**
+     * Setup activity to show on lock screen and wake up the device
+     */
+    private void setupLockScreenDisplay() {
+        // For Android 8.1 (API 27) and above
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true);
+            setTurnScreenOn(true);
+
+            // Dismiss keyguard for Android 10 and below
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                KeyguardManager keyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+                if (keyguardManager != null) {
+                    keyguardManager.requestDismissKeyguard(this, null);
+                }
+            }
+        } else {
+            // For older Android versions
+            getWindow().addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            );
+        }
+
+        // Keep screen on during recording
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        // Wake up the device if screen is off
+        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if (powerManager != null && !powerManager.isInteractive()) {
+            PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK |
+                PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                "SafetyApp::EvidenceRecording"
+            );
+            wakeLock.acquire(5 * 60 * 1000L); // Keep screen on for 5 minutes (recording duration)
+            wakeLock.release();
+        }
+
+        Log.i(TAG, "Lock screen display configured for evidence recording");
     }
 
     private boolean hasRequiredPermissions() {
