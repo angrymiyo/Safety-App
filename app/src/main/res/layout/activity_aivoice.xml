@@ -1,296 +1,514 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_aivoice_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA"
-    android:fillViewport="true"
+    android:background="@drawable/gradient_background"
     tools:context=".AIVoiceActivity">
 
-    <LinearLayout
+    <!-- Main Content -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <!-- Header Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center"
-            android:layout_marginBottom="24dp">
+            android:padding="16dp">
 
-            <ImageView
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:src="@drawable/ic_sos"
-                android:tint="#FF5252"
-                android:layout_marginBottom="12dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Voice Guardian"
-                android:textSize="28sp"
-                android:textColor="@color/Deep_Navy"
-                android:textStyle="bold"
-                android:layout_marginBottom="4dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="24/7 Protection Active"
-                android:textSize="14sp"
-                android:textColor="#4CAF50"
-                android:textStyle="bold"/>
-        </LinearLayout>
-
-        <!-- Live Monitoring Status Card -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="6dp"
-            app:cardBackgroundColor="@android:color/white">
-
+            <!-- Header Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:gravity="center"
+                android:paddingTop="8dp"
+                android:paddingBottom="16dp">
 
-                <!-- Status Header -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <View
-                        android:id="@+id/status_indicator"
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:background="@drawable/circle_pulse"
-                        android:backgroundTint="#4CAF50"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Live Monitoring"
-                        android:textSize="18sp"
-                        android:textColor="@color/Deep_Navy"
-                        android:textStyle="bold"
-                        android:layout_marginStart="12dp"/>
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_btn_speak_now"
-                        android:tint="@color/Deep_Navy"/>
-                </LinearLayout>
-
-                <!-- Status Text -->
                 <TextView
-                    android:id="@+id/tv_status"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Initializing voice detection..."
-                    android:textSize="15sp"
-                    android:textColor="#666666"
-                    android:layout_marginBottom="12dp"
-                    android:minHeight="48dp"
-                    android:gravity="center_vertical"/>
+                    android:text="🎙️ AI Voice Guardian"
+                    android:textSize="28sp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:shadowColor="#40000000"
+                    android:shadowDx="0"
+                    android:shadowDy="2"
+                    android:shadowRadius="4"
+                    android:layout_marginBottom="4dp"/>
 
-                <!-- Audio Level Meter -->
+                <TextView
+                    android:id="@+id/tv_header_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔴 Monitoring Continuously"
+                    android:textSize="14sp"
+                    android:textColor="#E0FFFFFF"
+                    android:alpha="0.9"/>
+            </LinearLayout>
+
+            <!-- Main Voice Visualization Card -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="12dp"
+                app:cardBackgroundColor="#FFFFFF">
+
                 <LinearLayout
-                    android:id="@+id/audio_meter_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_marginTop="8dp"
-                    android:visibility="gone">
+                    android:padding="24dp"
+                    android:gravity="center">
+
+                    <!-- Status Indicator -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="20dp">
+
+                        <View
+                            android:id="@+id/status_indicator"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:background="@drawable/circle_pulse"
+                            android:backgroundTint="#4CAF50"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Listening Status"
+                            android:textSize="16sp"
+                            android:textColor="#1A237E"
+                            android:textStyle="bold"
+                            android:layout_marginStart="12dp"/>
+
+                        <TextView
+                            android:id="@+id/tv_listening_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Active"
+                            android:textSize="13sp"
+                            android:textColor="#4CAF50"
+                            android:textStyle="bold"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="4dp"
+                            android:background="@drawable/badge_background"
+                            android:backgroundTint="#E8F5E9"/>
+                    </LinearLayout>
+
+                    <!-- Voice Wave Animation Container -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"
+                        android:background="@drawable/voice_wave_background"
+                        android:layout_marginBottom="16dp">
+
+                        <include layout="@layout/voice_wave_animation"/>
+
+                        <!-- Center Microphone Icon -->
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/iv_microphone"
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
+                                android:src="@drawable/ic_microphone"
+                                android:tint="#5E35B1"
+                                android:elevation="8dp"
+                                android:padding="16dp"
+                                android:background="@drawable/circle_white_shadow"/>
+
+                            <TextView
+                                android:id="@+id/tv_audio_level_percent"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0%"
+                                android:textSize="16sp"
+                                android:textColor="#5E35B1"
+                                android:textStyle="bold"
+                                android:layout_marginTop="8dp"/>
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <!-- Audio Level Progress -->
+                    <LinearLayout
+                        android:id="@+id/audio_meter_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Audio Level"
+                            android:textSize="12sp"
+                            android:textColor="#78909C"
+                            android:layout_marginBottom="6dp"/>
+
+                        <ProgressBar
+                            android:id="@+id/progress_bar"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="8dp"
+                            android:indeterminate="false"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressDrawable="@drawable/progress_gradient"
+                            android:progressBackgroundTint="#E0E0E0"/>
+                    </LinearLayout>
+
+                    <!-- Status Message -->
+                    <TextView
+                        android:id="@+id/tv_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="⚡ Listening for emergency keywords only - Instant SOS trigger"
+                        android:textSize="14sp"
+                        android:textColor="#546E7A"
+                        android:gravity="center"
+                        android:minHeight="40dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Real-time Speech Recognition Display -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_speech_recognition"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="#FFFFFF"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_speech_recognition"
+                            android:tint="#2196F3"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="You're saying..."
+                            android:textSize="15sp"
+                            android:textColor="#2196F3"
+                            android:textStyle="bold"
+                            android:layout_marginStart="10dp"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_recognized_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Listening..."
+                        android:textSize="16sp"
+                        android:textColor="#263238"
+                        android:minHeight="60dp"
+                        android:gravity="center_vertical"
+                        android:background="@drawable/speech_bubble_background"
+                        android:padding="16dp"
+                        android:lineSpacingExtra="4dp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Keyword Categories Status -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎯 Active Detection Categories"
+                android:textSize="18sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:layout_marginBottom="12dp"
+                android:shadowColor="#40000000"
+                android:shadowDx="0"
+                android:shadowDy="1"
+                android:shadowRadius="2"/>
+
+            <include layout="@layout/keyword_categories_grid"/>
+
+            <!-- Detection Statistics -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Audio Level"
-                        android:textSize="12sp"
-                        android:textColor="#999999"
-                        android:layout_marginBottom="8dp"/>
+                        android:text="📊 Detection Metrics"
+                        android:textSize="17sp"
+                        android:textColor="#1A237E"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp"/>
 
-                    <ProgressBar
-                        android:id="@+id/progress_bar"
-                        style="?android:attr/progressBarStyleHorizontal"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="6dp"
-                        android:indeterminate="false"
-                        android:max="100"
-                        android:progress="0"
-                        android:progressTint="#4CAF50"
-                        android:progressBackgroundTint="#E0E0E0"/>
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="3">
+
+                        <!-- Distress Level -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="12dp"
+                            android:background="@drawable/stat_card_background">
+
+                            <TextView
+                                android:id="@+id/tv_scream_prob"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0%"
+                                android:textSize="24sp"
+                                android:textColor="#E53935"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Distress"
+                                android:textSize="11sp"
+                                android:textColor="#78909C"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <!-- Voice Match -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="12dp"
+                            android:layout_marginStart="8dp"
+                            android:background="@drawable/stat_card_background">
+
+                            <TextView
+                                android:id="@+id/tv_voice_match"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="—"
+                                android:textSize="24sp"
+                                android:textColor="#1E88E5"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Match"
+                                android:textSize="11sp"
+                                android:textColor="#78909C"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+
+                        <!-- Instant Trigger Status -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="12dp"
+                            android:layout_marginStart="8dp"
+                            android:background="@drawable/stat_card_background">
+
+                            <TextView
+                                android:id="@+id/tv_detection_count"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="✓"
+                                android:textSize="24sp"
+                                android:textColor="#43A047"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Instant"
+                                android:textSize="11sp"
+                                android:textColor="#78909C"
+                                android:layout_marginTop="4dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Confidence Meter -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Detection Confidence"
+                                android:textSize="12sp"
+                                android:textColor="#78909C"/>
+
+                            <TextView
+                                android:id="@+id/tv_confidence_value"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0%"
+                                android:textSize="13sp"
+                                android:textColor="#5E35B1"
+                                android:textStyle="bold"/>
+                        </LinearLayout>
+
+                        <ProgressBar
+                            android:id="@+id/progress_confidence"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="8dp"
+                            android:indeterminate="false"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressDrawable="@drawable/progress_confidence"
+                            android:layout_marginTop="6dp"/>
+                    </LinearLayout>
                 </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
-                <!-- Detection Stats Grid -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="16dp"
-                    android:weightSum="3">
-
-                    <!-- Scream Probability -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:id="@+id/tv_scream_prob"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0%"
-                            android:textSize="20sp"
-                            android:textColor="@color/Deep_Navy"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Distress"
-                            android:textSize="11sp"
-                            android:textColor="#999999"/>
-                    </LinearLayout>
-
-                    <!-- Voice Match -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:id="@+id/tv_voice_match"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="—"
-                            android:textSize="20sp"
-                            android:textColor="@color/Deep_Navy"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Match"
-                            android:textSize="11sp"
-                            android:textColor="#999999"/>
-                    </LinearLayout>
-
-                    <!-- Detection Count -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:id="@+id/tv_detection_count"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="0/2"
-                            android:textSize="20sp"
-                            android:textColor="@color/Deep_Navy"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Confirms"
-                            android:textSize="11sp"
-                            android:textColor="#999999"/>
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Voice Enrollment Card -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="#E3F2FD">
-
-            <LinearLayout
+            <!-- Voice Enrollment Card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_voice_enrollment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="#E3F2FD">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@android:drawable/ic_btn_speak_now"
-                        android:tint="#1976D2"
-                        android:layout_marginEnd="16dp"/>
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Voice Enrollment"
-                            android:textSize="16sp"
-                            android:textColor="#1976D2"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"/>
+                        <ImageView
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_voice_enrollment"
+                            android:tint="#1976D2"
+                            android:padding="8dp"
+                            android:background="@drawable/circle_white"
+                            android:layout_marginEnd="16dp"/>
 
-                        <TextView
-                            android:id="@+id/tv_enrollment_status"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:text="Enroll your voice for personalized detection"
-                            android:textSize="13sp"
-                            android:textColor="#666666"/>
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Voice Enrollment"
+                                android:textSize="17sp"
+                                android:textColor="#1976D2"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="4dp"/>
+
+                            <TextView
+                                android:id="@+id/tv_enrollment_status"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Train AI to recognize your voice"
+                                android:textSize="13sp"
+                                android:textColor="#546E7A"
+                                android:lineSpacingExtra="2dp"/>
+                        </LinearLayout>
                     </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_enroll_voice"
+                        android:layout_width="match_parent"
+                        android:layout_height="54dp"
+                        android:text="Enroll My Voice"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="27dp"
+                        app:icon="@drawable/ic_fingerprint"
+                        app:iconGravity="textStart"
+                        app:iconSize="22dp"
+                        app:backgroundTint="#1976D2"
+                        android:textColor="@android:color/white"
+                        android:elevation="4dp"/>
                 </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_enroll_voice"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:text="Enroll Voice Now"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="25dp"
-                    app:icon="@android:drawable/ic_btn_speak_now"
-                    app:iconGravity="textStart"
-                    app:backgroundTint="#1976D2"
-                    android:textColor="@android:color/white"
-                    android:layout_marginTop="16dp"/>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+            <!-- Bottom Spacing -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="80dp"/>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
-    </LinearLayout>
-</ScrollView>
+    <!-- Emergency Detection Overlay (Hidden by default) -->
+    <include
+        layout="@layout/emergency_detection_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

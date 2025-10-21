@@ -49,10 +49,10 @@ public class VoiceDetectionService extends Service {
     private static final int BUFFER_SIZE = SAMPLE_RATE * RECORD_DURATION_MS / 1000;
 
     // Optimized thresholds for distress-only detection (balanced for accuracy + speed)
-    private static final float SCREAM_THRESHOLD = 0.73f; // High accuracy - only real distress screams
+    private static final float SCREAM_THRESHOLD = 0.5f; // 50% distress detection threshold - more sensitive
     private static final float MIN_VERIFY_RMS = 0.05f; // Lower volume required - catches quieter distress
     private static final float HIGH_INTENSITY_RMS = 0.10f; // Moderate intensity - not too loud required
-    private static final int CONSECUTIVE_POSITIVES_REQUIRED = 2; // Fast response (2 confirmations = ~2 seconds)
+    private static final int CONSECUTIVE_POSITIVES_REQUIRED = 1; // Instant trigger - no confirmation needed
     private static final long COOLDOWN_MS = 30_000;
 
     // Enhanced detection parameters

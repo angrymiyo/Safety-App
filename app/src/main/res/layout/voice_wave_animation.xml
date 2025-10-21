@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Voice Wave Animation - Beautiful animated sound waves -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:weightSum="7">
+
+    <!-- Wave Bar 1 -->
+    <View
+        android:id="@+id/wave_bar_1"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="20dp"
+        android:layout_margin="3dp"
+        android:background="@drawable/wave_bar"
+        android:backgroundTint="#5E35B1"
+        android:alpha="0.3"/>
+
+    <!-- Wave Bar 2 -->
+    <View
+        android:id="@+id/wave_bar_2"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="40dp"
+        android:layout_margin="3dp"
+        android:background="@drawable/wave_bar"
+        android:backgroundTint="#673AB7"
+        android:alpha="0.4"/>
+
+    <!-- Wave Bar 3 -->
+    <View
+        android:id="@+id/wave_bar_3"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="60dp"
+        android:layout_margin="3dp"
+        android:background="@drawable/wave_bar"
+        android:backgroundTint="#7E57C2"
+        android:alpha="0.5"/>
+
+    <!-- Center Wave Bar 4 (tallest) -->
+    <View
+        android:id="@+id/wave_bar_4"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="80dp"
+        android:layout_margin="3dp"
+        android:background="@drawable/wave_bar"
+        android:backgroundTint="#9575CD"
+        android:alpha="0.6"/>
+
+    <!-- Wave Bar 5 -->
+    <View
+        android:id="@+id/wave_bar_5"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="60dp"
+        android:layout_margin="3dp"
+        android:background="@drawable/wave_bar"
+        android:backgroundTint="#7E57C2"
+        android:alpha="0.5"/>
+
+    <!-- Wave Bar 6 -->
+    <View
+        android:id="@+id/wave_bar_6"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="40dp"
+        android:layout_margin="3dp"
+        android:background="@drawable/wave_bar"
+        android:backgroundTint="#673AB7"
+        android:alpha="0.4"/>
+
+    <!-- Wave Bar 7 -->
+    <View
+        android:id="@+id/wave_bar_7"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="20dp"
+        android:layout_margin="3dp"
+        android:background="@drawable/wave_bar"
+        android:backgroundTint="#5E35B1"
+        android:alpha="0.3"/>
+
+</LinearLayout>
