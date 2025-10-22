@@ -14,8 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
+
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -283,96 +282,96 @@ public class LiveLocation extends BaseActivity {
         });
     }
 
-    private void startContinuousTracking(String method) {
-        // Check for fine location permission
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    LOCATION_PERMISSION_CODE);
-            return;
-        }
-
-        // Check for background location permission (Android 10+) for continuous tracking
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
-                        BACKGROUND_LOCATION_PERMISSION_CODE);
-                return;
-            }
-        }
-
-        // Generate unique share ID for this tracking session
-        shareId = currentUser.getUid() + "_" + System.currentTimeMillis();
-        isSharing = true;
-
-        // Start continuous location updates
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
-
-        // Create live location session in Firebase
-        createLiveLocationSession();
-
-        // Get saved emergency message from Firebase
-        DatabaseReference messageRef = FirebaseDatabase.getInstance()
-                .getReference("Users")
-                .child(currentUser.getUid())
-                .child("emergencyMessage");
-
-        messageRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                String savedMessage = snapshot.getValue(String.class);
-                String userMessage;
-
-                if (savedMessage != null && !savedMessage.isEmpty()) {
-                    // Use saved emergency message
-                    userMessage = savedMessage;
-                } else {
-                    // Use default message
-                    userMessage = "I'm sharing my live location with you.";
-                }
-
-                // Create a direct Google Maps link with the Firebase data
-                // This will be a web page that reads from Firebase and displays on Google Maps
-                String trackingUrl = "https://www.google.com/maps/dir/?api=1&destination=" + shareId + "&travelmode=driving";
-
-                String finalMessage = userMessage + "\n\n📍 Track my live location:\n" + trackingUrl + "\n\n🔴 Updates every 2 seconds as I move (active for 1 hour)";
-
-                // Send message with live tracking link to all contacts
-                for (Contact contact : contacts) {
-                    sendWhatsApp(contact.getPhone(), finalMessage);
-                }
-
-                Toast.makeText(LiveLocation.this, "Live location sharing started!", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Use default message if Firebase fails
-                String defaultMessage = "I'm sharing my live location with you.";
-                String googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=" + shareId;
-                String finalMessage = defaultMessage + "\n\n📍 Track my live location on Google Maps:\n" + googleMapsUrl + "\n\n🔴 This link updates automatically as I move (active for 1 hour)";
-
-                for (Contact contact : contacts) {
-                    sendWhatsApp(contact.getPhone(), finalMessage);
-                }
-
-                Toast.makeText(LiveLocation.this, "Live location sharing started!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // Update UI
-        btnShare.setEnabled(false);
-        btnStopSharing.setEnabled(true);
-        tvStatus.setText("LIVE: Tracking active");
-        statusDot.setBackgroundResource(R.drawable.status_dot_active);
-        statusDotGlow.setBackgroundResource(R.drawable.status_dot_glow_active);
-
-        // Auto-stop after 1 hour
-        handler.postDelayed(this::stopLiveLocationSharing, 3600000); // 1 hour
-    }
+//    private void startContinuousTracking(String method) {
+//        // Check for fine location permission
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+//                != PackageManager.PERMISSION_GRANTED) {
+//            ActivityCompat.requestPermissions(this,
+//                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+//                    LOCATION_PERMISSION_CODE);
+//            return;
+//        }
+//
+//        // Check for background location permission (Android 10+) for continuous tracking
+//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+//            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+//                    != PackageManager.PERMISSION_GRANTED) {
+//                ActivityCompat.requestPermissions(this,
+//                        new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
+//                        BACKGROUND_LOCATION_PERMISSION_CODE);
+//                return;
+//            }
+//        }
+//
+//        // Generate unique share ID for this tracking session
+//        shareId = currentUser.getUid() + "_" + System.currentTimeMillis();
+//        isSharing = true;
+//
+//        // Start continuous location updates
+//        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+//
+//        // Create live location session in Firebase
+//        createLiveLocationSession();
+//
+//        // Get saved emergency message from Firebase
+//        DatabaseReference messageRef = FirebaseDatabase.getInstance()
+//                .getReference("Users")
+//                .child(currentUser.getUid())
+//                .child("emergencyMessage");
+//
+//        messageRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot snapshot) {
+//                String savedMessage = snapshot.getValue(String.class);
+//                String userMessage;
+//
+//                if (savedMessage != null && !savedMessage.isEmpty()) {
+//                    // Use saved emergency message
+//                    userMessage = savedMessage;
+//                } else {
+//                    // Use default message
+//                    userMessage = "I'm sharing my live location with you.";
+//                }
+//
+//                // Create a direct Google Maps link with the Firebase data
+//                // This will be a web page that reads from Firebase and displays on Google Maps
+//                String trackingUrl = "https://www.google.com/maps/dir/?api=1&destination=" + shareId + "&travelmode=driving";
+//
+//                String finalMessage = userMessage + "\n\n📍 Track my live location:\n" + trackingUrl + "\n\n🔴 Updates every 2 seconds as I move (active for 1 hour)";
+//
+//                // Send message with live tracking link to all contacts
+//                for (Contact contact : contacts) {
+//                    sendWhatsApp(contact.getPhone(), finalMessage);
+//                }
+//
+//                Toast.makeText(LiveLocation.this, "Live location sharing started!", Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError error) {
+//                // Use default message if Firebase fails
+//                String defaultMessage = "I'm sharing my live location with you.";
+//                String googleMapsUrl = "https://www.google.com/maps/search/?api=1&query=" + shareId;
+//                String finalMessage = defaultMessage + "\n\n📍 Track my live location on Google Maps:\n" + googleMapsUrl + "\n\n🔴 This link updates automatically as I move (active for 1 hour)";
+//
+//                for (Contact contact : contacts) {
+//                    sendWhatsApp(contact.getPhone(), finalMessage);
+//                }
+//
+//                Toast.makeText(LiveLocation.this, "Live location sharing started!", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+//
+//        // Update UI
+//        btnShare.setEnabled(false);
+//        btnStopSharing.setEnabled(true);
+//        tvStatus.setText("LIVE: Tracking active");
+//        statusDot.setBackgroundResource(R.drawable.status_dot_active);
+//        statusDotGlow.setBackgroundResource(R.drawable.status_dot_glow_active);
+//
+//        // Auto-stop after 1 hour
+//        handler.postDelayed(this::stopLiveLocationSharing, 3600000); // 1 hour
+//    }
 
     private void createLiveLocationSession() {
         Map<String, Object> sessionData = new HashMap<>();
