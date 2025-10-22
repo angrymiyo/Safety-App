@@ -78,12 +78,12 @@ public class ShakeDetectionService extends Service implements ShakeDetector.OnSh
     @Override
     public void onShake() {
         // Start 60-second video recording in background
-        Intent videoIntent = new Intent(this, VideoRecordingService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(videoIntent);
-        } else {
-            startService(videoIntent);
-        }
+//        Intent videoIntent = new Intent(this, VideoRecordingService.class);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            startForegroundService(videoIntent);
+//        } else {
+//            startService(videoIntent);
+//        }
 
         // Show popup countdown (exactly like power button trigger)
         Intent sosIntent = new Intent(this, PopupCountdownActivity.class);

@@ -23,6 +23,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.safetyapp.helper.EmergencyMessageHelper;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 
@@ -39,6 +41,10 @@ public class PopupCountdownActivity extends AppCompatActivity {
     private EmergencyMessageHelper messageHelper;
     private boolean permissionsGranted = false;
 
+    private FusedLocationProviderClient locationClient;
+    private String emergencyMessage = "";
+    private String locationUrl = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +60,7 @@ public class PopupCountdownActivity extends AppCompatActivity {
 
         method = getIntent().getStringExtra("method");
         messageHelper = new EmergencyMessageHelper(this);
+        locationClient = LocationServices.getFusedLocationProviderClient(this);
 
         btnCancel.setOnClickListener(v -> {
             if (countDownTimer != null) countDownTimer.cancel();
@@ -254,12 +261,59 @@ public class PopupCountdownActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 tvCountdown.setText("Sending...");
-                messageHelper.sendMessage(method);
-                finish();
+                // Send emergency message like SOS button - fetch message, location, then send
+                fetchEmergencyMessage(() -> fetchLocation(() -> {
+                    String fullMessage = emergencyMessage + "\n\nLocation: " + locationUrl;
+                    messageHelper.sendCustomMessage(method, fullMessage);
+                    Toast.makeText(PopupCountdownActivity.this, "Emergency alert sent!", Toast.LENGTH_SHORT).show();
+                    finish();
+                }));
             }
         };
 
         countDownTimer.start();
+    }
+
+    private void fetchEmergencyMessage(Runnable callback) {
+        DatabaseReference userRef = FirebaseDatabase.getInstance()
+                .getReference("Users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
+        userRef.child("emergency_message_template").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                emergencyMessage = snapshot.exists() ? snapshot.getValue(String.class) : "Help me!";
+                callback.run();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                emergencyMessage = "Help me!";
+                callback.run();
+            }
+        });
+    }
+
+    private void fetchLocation(Runnable callback) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            locationUrl = "Location not available";
+            callback.run();
+            return;
+        }
+
+        locationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        locationUrl = "https://maps.google.com/?q=" + location.getLatitude() + "," + location.getLongitude();
+                    } else {
+                        locationUrl = "Location not available";
+                    }
+                    callback.run();
+                })
+                .addOnFailureListener(e -> {
+                    locationUrl = "Location not available";
+                    callback.run();
+                });
     }
 
     @Override

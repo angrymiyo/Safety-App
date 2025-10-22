@@ -226,14 +226,16 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
                 .show();
     }
 
+
+    //SOS Button
     private void sendSOSImmediately(String method) {
         // Start 60-second video recording in background
-        Intent videoIntent = new Intent(this, VideoRecordingService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(videoIntent);
-        } else {
-            startService(videoIntent);
-        }
+//        Intent videoIntent = new Intent(this, VideoRecordingService.class);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            startForegroundService(videoIntent);
+//        } else {
+//            startService(videoIntent);
+//        }
 
         // Send SOS immediately without countdown
         fetchEmergencyMessage(() -> fetchLocation(() -> {
@@ -242,13 +244,6 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
             helper.sendCustomMessage(method, fullMessage);
             Toast.makeText(this, "Emergency alert sent!", Toast.LENGTH_SHORT).show();
         }));
-    }
-
-    private void sendSOSEmergency(String method) {
-        // Show popup countdown - Only used for shake and power button triggers
-        Intent intent = new Intent(this, PopupCountdownActivity.class);
-        intent.putExtra("method", method);
-        startActivity(intent);
     }
 
     private void initializeShakeDetection() {
@@ -271,61 +266,6 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
         // This method is not used anymore but kept for interface implementation
     }
 
-
-    private void capturePhoto() {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        try {
-            File photoFile = createImageFile();
-            imageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider", photoFile);
-            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-            cameraLauncher.launch(cameraIntent);
-        } catch (IOException e) {
-            Toast.makeText(this, "Camera error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
-    private File createImageFile() throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        File storageDir = getExternalFilesDir("Pictures");
-        return File.createTempFile("SOS_" + timeStamp, ".jpg", storageDir);
-    }
-
-        private final ActivityResultLauncher<Intent> cameraLauncher =
-            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
-                if (result.getResultCode() == RESULT_OK && imageUri != null) {
-                    fetchEmergencyMessage(() -> fetchLocation(() -> {
-                        String fullMessage = emergencyMessage + "\n\nLocation: " + locationUrl;
-
-                        EmergencyMessageHelper helper = new EmergencyMessageHelper(MainActivity.this);
-                        helper.sendCustomMessage("sms", fullMessage);
-                        postToFacebookWithImage(imageUri, fullMessage);
-                    }));
-                } else {
-                    Toast.makeText(this, "Camera canceled or failed", Toast.LENGTH_SHORT).show();
-                }
-            });
-    private void postToFacebookWithImage(Uri imageUri, String message) {
-        try {
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-
-            if (ShareDialog.canShow(SharePhotoContent.class)) {
-                SharePhoto photo = new SharePhoto.Builder()
-                        .setBitmap(bitmap)
-                        .setCaption(message)
-                        .build();
-
-                SharePhotoContent content = new SharePhotoContent.Builder()
-                        .addPhoto(photo)
-                        .build();
-
-                new ShareDialog(this).show(content);
-            } else {
-                Toast.makeText(this, "Facebook share dialog not available", Toast.LENGTH_SHORT).show();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Failed to load image for Facebook", Toast.LENGTH_SHORT).show();
-        }
-    }
     private void fetchEmergencyMessage(Runnable callback) {
         DatabaseReference userRef = FirebaseDatabase.getInstance()
                 .getReference("Users")
