@@ -242,7 +242,7 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
             LiveLocationManager locationManager = new LiveLocationManager(this);
             LiveLocationManager.TrackingInfo trackingInfo = locationManager.startTracking();
 
-            String fullMessage = emergencyMessage + "\n\n📍 " + trackingInfo.getTrackingUrl();
+            String fullMessage = emergencyMessage + "\n\n " + trackingInfo.getTrackingUrl();
 
             EmergencyMessageHelper helper = new EmergencyMessageHelper(this);
             helper.sendCustomMessage(method, fullMessage);
