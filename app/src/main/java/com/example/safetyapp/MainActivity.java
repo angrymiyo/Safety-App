@@ -12,6 +12,8 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
@@ -225,26 +227,40 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
                 })
                 .show();
     }
-
-
-    //SOS Button
     private void sendSOSImmediately(String method) {
         // Start 60-second video recording in background
-//        Intent videoIntent = new Intent(this, VideoRecordingService.class);
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            startForegroundService(videoIntent);
-//        } else {
-//            startService(videoIntent);
-//        }
+        Intent videoIntent = new Intent(this, VideoRecordingService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(videoIntent);
+        } else {
+            startService(videoIntent);
+        }
 
-        // Send SOS immediately without countdown
-        fetchEmergencyMessage(() -> fetchLocation(() -> {
-            String fullMessage = emergencyMessage + "\n\nLocation: " + locationUrl;
-            EmergencyMessageHelper helper = new EmergencyMessageHelper(MainActivity.this);
+
+        fetchEmergencyMessage(() -> {
+            // Use LiveLocationManager instead of static location
+            LiveLocationManager locationManager = new LiveLocationManager(this);
+            LiveLocationManager.TrackingInfo trackingInfo = locationManager.startTracking();
+
+            String fullMessage = emergencyMessage + "\n\n📍 " + trackingInfo.getTrackingUrl();
+
+            EmergencyMessageHelper helper = new EmergencyMessageHelper(this);
             helper.sendCustomMessage(method, fullMessage);
-            Toast.makeText(this, "Emergency alert sent!", Toast.LENGTH_SHORT).show();
-        }));
+            Toast.makeText(this, "SOS sent with live tracking!", Toast.LENGTH_SHORT).show();
+        });
     }
+
+    //SOS Button
+//    private void sendSOSImmediately(String method) {
+//        // Send SOS immediately without countdown
+//        fetchEmergencyMessage(() -> fetchLocation(() -> {
+//            String fullMessage = emergencyMessage + "\n\nLocation: " + locationUrl;
+//            EmergencyMessageHelper helper = new EmergencyMessageHelper(MainActivity.this);
+//            helper.sendCustomMessage(method, fullMessage);
+//            Toast.makeText(this, "Emergency alert sent!", Toast.LENGTH_SHORT).show();
+//        }));
+//    }
+
 
     private void initializeShakeDetection() {
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);

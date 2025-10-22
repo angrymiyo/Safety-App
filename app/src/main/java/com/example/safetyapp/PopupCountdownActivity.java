@@ -43,7 +43,7 @@ public class PopupCountdownActivity extends AppCompatActivity {
 
     private FusedLocationProviderClient locationClient;
     private String emergencyMessage = "";
-    private String locationUrl = "";
+    private LiveLocationManager locationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +61,7 @@ public class PopupCountdownActivity extends AppCompatActivity {
         method = getIntent().getStringExtra("method");
         messageHelper = new EmergencyMessageHelper(this);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
+        locationManager = new LiveLocationManager(this);
 
         btnCancel.setOnClickListener(v -> {
             if (countDownTimer != null) countDownTimer.cancel();
@@ -261,13 +262,14 @@ public class PopupCountdownActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 tvCountdown.setText("Sending...");
-                // Send emergency message like SOS button - fetch message, location, then send
-                fetchEmergencyMessage(() -> fetchLocation(() -> {
-                    String fullMessage = emergencyMessage + "\n\nLocation: " + locationUrl;
+                // Send emergency message with live tracking
+                fetchEmergencyMessage(() -> {
+                    LiveLocationManager.TrackingInfo trackingInfo = locationManager.startTracking();
+                    String fullMessage = emergencyMessage + "\n\n " + trackingInfo.getTrackingUrl();
                     messageHelper.sendCustomMessage(method, fullMessage);
-                    Toast.makeText(PopupCountdownActivity.this, "Emergency alert sent!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PopupCountdownActivity.this, "Emergency alert sent with live tracking!", Toast.LENGTH_SHORT).show();
                     finish();
-                }));
+                });
             }
         };
 
@@ -292,28 +294,6 @@ public class PopupCountdownActivity extends AppCompatActivity {
                 callback.run();
             }
         });
-    }
-
-    private void fetchLocation(Runnable callback) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            locationUrl = "Location not available";
-            callback.run();
-            return;
-        }
-
-        locationClient.getLastLocation()
-                .addOnSuccessListener(location -> {
-                    if (location != null) {
-                        locationUrl = "https://maps.google.com/?q=" + location.getLatitude() + "," + location.getLongitude();
-                    } else {
-                        locationUrl = "Location not available";
-                    }
-                    callback.run();
-                })
-                .addOnFailureListener(e -> {
-                    locationUrl = "Location not available";
-                    callback.run();
-                });
     }
 
     @Override

@@ -101,29 +101,21 @@ public class EmergencyMessageHelper {
 
     private void sendSms(String phone, String message) {
         try {
-            android.util.Log.i("EmergencyHelper", "Attempting to send SMS to: " + phone);
-            android.util.Log.d("EmergencyHelper", "Message content: " + message);
-
             SmsManager smsManager = SmsManager.getDefault();
 
             // Split message if too long (SMS limit is 160 characters)
             if (message.length() > 160) {
-                android.util.Log.i("EmergencyHelper", "Message longer than 160 chars, splitting into multiple parts");
                 ArrayList<String> parts = smsManager.divideMessage(message);
                 smsManager.sendMultipartTextMessage(phone, null, parts, null, null);
-                android.util.Log.i("EmergencyHelper", "Multi-part SMS sent successfully to " + phone + " (" + parts.size() + " parts)");
             } else {
                 smsManager.sendTextMessage(phone, null, message, null, null);
-                android.util.Log.i("EmergencyHelper", "Single SMS sent successfully to " + phone);
             }
 
             showSimpleNotification("Emergency SMS Sent", "Message sent to " + phone);
 
         } catch (SecurityException e) {
-            android.util.Log.e("EmergencyHelper", "❌ SMS permission denied when sending to " + phone, e);
             Toast.makeText(activity, "❌ SMS permission denied for " + phone, Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            android.util.Log.e("EmergencyHelper", "❌ Failed to send SMS to " + phone, e);
             Toast.makeText(activity, "❌ Failed to send SMS to " + phone + ": " + e.getMessage(), Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
