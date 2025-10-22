@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.PowerManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -50,6 +51,7 @@ public class VideoRecordingService extends LifecycleService {
     private Handler handler;
     private Uri savedVideoUri;
     private long recordingStartTime = 0;
+    private PowerManager.WakeLock wakeLock;
 
     @Override
     public void onCreate() {
@@ -60,6 +62,12 @@ public class VideoRecordingService extends LifecycleService {
 
         handler = new Handler(Looper.getMainLooper());
         createNotificationChannel();
+
+        // Acquire wake lock to keep service running even when screen is off
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SafetyApp::VideoRecording");
+        wakeLock.acquire(70000); // Hold for 70 seconds (slightly more than 60s recording)
+        android.util.Log.i(TAG, "✅ Wake lock acquired - service will stay active");
     }
 
     @Override
@@ -345,5 +353,11 @@ public class VideoRecordingService extends LifecycleService {
         super.onDestroy();
         android.util.Log.i(TAG, "onDestroy() called - cleaning up");
         handler.removeCallbacksAndMessages(null);
+
+        // Release wake lock
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
+            android.util.Log.i(TAG, "✅ Wake lock released");
+        }
     }
 }
