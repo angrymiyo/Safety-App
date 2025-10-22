@@ -66,6 +66,9 @@ dependencies {
     implementation ("androidx.camera:camera-video:1.3.1")
     implementation ("androidx.camera:camera-view:1.3.1")
 
+    // Lifecycle Service for background camera recording
+    implementation ("androidx.lifecycle:lifecycle-service:2.6.2")
+
     // Guava for ListenableFuture (required by CameraX)
     implementation ("com.google.guava:guava:31.1-android")
 

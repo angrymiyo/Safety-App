@@ -228,19 +228,18 @@ public class VoiceDetectionService extends Service {
             e.printStackTrace();
         }
 
-        // Start Evidence Recording with flags to show on lock screen
+        // Start 60-second video recording in background
         try {
-            Log.i("VoiceService", "Starting evidence recording activity...");
-            Intent evidenceIntent = new Intent(this, EvidenceRecordingActivity.class);
-            evidenceIntent.addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK |
-                Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                Intent.FLAG_ACTIVITY_NO_USER_ACTION
-            );
-            startActivity(evidenceIntent);
-            Log.i("VoiceService", "✅ Evidence recording activity started");
+            Log.i("VoiceService", "Starting 60-second video recording service...");
+            Intent videoIntent = new Intent(this, VideoRecordingService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(videoIntent);
+            } else {
+                startService(videoIntent);
+            }
+            Log.i("VoiceService", "✅ Video recording service started");
         } catch (Exception e) {
-            Log.e("VoiceService", "❌ Failed to start evidence recording", e);
+            Log.e("VoiceService", "❌ Failed to start video recording", e);
             e.printStackTrace();
         }
 

@@ -33,6 +33,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
@@ -178,6 +179,10 @@
         <service
             android:name=".LocationTrackingService"
             android:foregroundServiceType="location"
+            android:exported="false" />
+        <service
+            android:name=".VideoRecordingService"
+            android:foregroundServiceType="camera|microphone"
             android:exported="false" />
 
     </application>

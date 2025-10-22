@@ -200,11 +200,15 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
         findViewById(R.id.btn_emergency_mode).setOnClickListener(v -> startActivity(new Intent(this, InCaseEmergencyActivity.class)));
         findViewById(R.id.btn_safe_zone).setOnClickListener(v -> startActivity(new Intent(this, SafeZoneActivity.class)));
 
-        // Alert button - Smart Evidence Recording
+        // Video Recording button - 60-second background recording
         findViewById(R.id.btn_alert).setOnClickListener(v -> {
-            Toast.makeText(this, "Starting evidence recording...", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(this, EvidenceRecordingActivity.class);
-            startActivity(intent);
+            Toast.makeText(this, "Starting 60-second video recording...", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(this, VideoRecordingService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(intent);
+            } else {
+                startService(intent);
+            }
         });
     }
 
@@ -223,9 +227,13 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
     }
 
     private void sendSOSImmediately(String method) {
-        // Start evidence recording
-        Intent evidenceIntent = new Intent(this, EvidenceRecordingActivity.class);
-        startActivity(evidenceIntent);
+        // Start 60-second video recording in background
+        Intent videoIntent = new Intent(this, VideoRecordingService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(videoIntent);
+        } else {
+            startService(videoIntent);
+        }
 
         // Send SOS immediately without countdown
         fetchEmergencyMessage(() -> fetchLocation(() -> {

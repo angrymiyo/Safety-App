@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 
 public class PowerButtonReceiver extends BroadcastReceiver {
 
@@ -30,10 +31,13 @@ public class PowerButtonReceiver extends BroadcastReceiver {
             if (pressCount == requiredCount) {
                 pressCount = 0;
 
-                // Start evidence recording
-                Intent evidenceIntent = new Intent(context, EvidenceRecordingActivity.class);
-                evidenceIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(evidenceIntent);
+                // Start 60-second video recording in background
+                Intent videoIntent = new Intent(context, VideoRecordingService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(videoIntent);
+                } else {
+                    context.startService(videoIntent);
+                }
 
                 // Show SOS popup
                 Intent sosIntent = new Intent(context, PopupCountdownActivity.class);

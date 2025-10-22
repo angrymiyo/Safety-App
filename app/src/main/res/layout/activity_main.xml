@@ -354,7 +354,7 @@
                         </LinearLayout>
                     </androidx.cardview.widget.CardView>
 
-                    <!-- Alert -->
+                    <!-- Video Recording -->
                     <androidx.cardview.widget.CardView
                         android:id="@+id/btn_alert"
                         android:layout_width="0dp"
@@ -363,7 +363,7 @@
                         android:layout_marginStart="8dp"
                         app:cardCornerRadius="16dp"
                         app:cardElevation="6dp"
-                        app:cardBackgroundColor="#16A085">
+                        app:cardBackgroundColor="#E74C3C">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -375,14 +375,14 @@
                             <ImageView
                                 android:layout_width="32dp"
                                 android:layout_height="32dp"
-                                android:src="@drawable/alert_24"
+                                android:src="@drawable/ic_camera"
                                 app:tint="@color/white"
                                 android:layout_marginBottom="6dp"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Alert"
+                                android:text="Video Recording"
                                 android:textColor="@color/white"
                                 android:textSize="12sp"
                                 android:textStyle="bold"
