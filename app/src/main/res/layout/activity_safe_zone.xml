@@ -1,72 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    android:background="@color/Light_Sky_Blue">
+    android:background="#F5F5F5"
+    android:fillViewport="true">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tv_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="You are in a Safe Zone"
-            android:textSize="20sp"
-            android:textColor="@color/Deep_Navy"
-            android:layout_centerHorizontal="true" />
-
-        <EditText
-            android:id="@+id/et_custom_message"
+        <!-- Header Section with Status -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tv_status"
-            android:layout_marginTop="24dp"
-            android:hint="Enter your custom message (optional)"
-            android:inputType="textMultiLine"
-            android:minLines="3"
-            android:background="@color/white"
-            android:textColor="@color/Deep_Navy"
-            android:textColorHint="#888888"
-            android:padding="10dp" />
+            android:background="@drawable/gradient_background"
+            android:paddingTop="20dp"
+            android:paddingBottom="24dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp">
 
-        <RadioGroup
-            android:id="@+id/radio_group_method"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_below="@id/et_custom_message"
-            android:layout_marginTop="16dp">
+            <!-- Safe Zone Icon -->
+            <ImageView
+                android:id="@+id/iv_safe_icon"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:src="@drawable/ic_check"
+                android:background="@drawable/circle_white_bg"
+                android:padding="14dp"
+                app:tint="@color/Deep_Navy"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:elevation="4dp" />
 
-            <RadioButton
-                android:id="@+id/radio_sms"
+            <!-- Status Text -->
+            <TextView
+                android:id="@+id/tv_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SMS"
-                android:textColor="@color/Deep_Navy"
-                android:textSize="16sp"
-                android:padding="8dp" />
+                android:layout_marginTop="12dp"
+                android:text="You are in a Safe Zone"
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                app:layout_constraintTop_toBottomOf="@id/iv_safe_icon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-            <RadioButton
-                android:id="@+id/radio_whatsapp"
+            <TextView
+                android:id="@+id/tv_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="WhatsApp"
-                android:textColor="@color/Deep_Navy"
-                android:textSize="16sp"
-                android:padding="8dp" />
+                android:layout_marginTop="4dp"
+                android:text="Let your contacts know you're safe"
+                android:textSize="13sp"
+                android:textColor="#E0E0E0"
+                android:alpha="0.9"
+                app:layout_constraintTop_toBottomOf="@id/tv_status"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-        </RadioGroup>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <Button
-            android:id="@+id/btn_send_ok"
+        <!-- Main Content Card -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Send Message"
-            android:textColor="@android:color/white"
-            android:backgroundTint="@color/Deep_Navy"
-            android:layout_below="@id/radio_group_method"
-            android:layout_marginTop="20dp" />
-    </RelativeLayout>
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="-16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Custom Message Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Custom Message"
+                    android:textColor="@color/Deep_Navy"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginBottom="8dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter your message (optional)"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusBottomEnd="12dp"
+                    app:boxStrokeColor="@color/Light_Sky_Blue"
+                    app:hintTextColor="@color/Deep_Navy"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_custom_message"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine"
+                        android:minLines="3"
+                        android:maxLines="4"
+                        android:gravity="top|start"
+                        android:textColor="@color/Deep_Navy"
+                        android:textSize="14sp"
+                        android:padding="10dp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="#E0E0E0" />
+
+                <!-- Sending Method Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Choose Sending Method"
+                    android:textColor="@color/Deep_Navy"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- SMS Option Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/card_sms"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@android:color/white"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="12dp"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/ic_sms"
+                            android:background="@drawable/icon_circle_bg"
+                            android:padding="10dp"
+                            app:tint="@android:color/white" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="SMS"
+                                android:textColor="@color/Deep_Navy"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Send via text message"
+                                android:textColor="#6C757D"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <RadioButton
+                            android:id="@+id/radio_sms"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <!-- WhatsApp Option Card -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/card_whatsapp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="2dp"
+                    app:cardBackgroundColor="@android:color/white"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="12dp"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/ic_whatsapp"
+                            android:background="@drawable/circle_green_bg"
+                            android:padding="10dp"
+                            app:tint="@android:color/white" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="WhatsApp"
+                                android:textColor="@color/Deep_Navy"
+                                android:textSize="15sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-medium" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Send via WhatsApp messenger"
+                                android:textColor="#6C757D"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <RadioButton
+                            android:id="@+id/radio_whatsapp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <!-- Hidden RadioGroup for compatibility -->
+                <RadioGroup
+                    android:id="@+id/radio_group_method"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:visibility="gone">
+                </RadioGroup>
+
+                <!-- Send Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_send_ok"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="20dp"
+                    android:text="Send Safe Zone Message"
+                    android:textColor="@android:color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    app:icon="@drawable/ic_send"
+                    app:iconGravity="textStart"
+                    app:iconPadding="10dp"
+                    app:iconTint="@android:color/white"
+                    android:backgroundTint="@color/Deep_Navy"
+                    app:cornerRadius="12dp"
+                    android:elevation="4dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Info Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="16dp"
+            android:padding="12dp"
+            android:background="@drawable/rounded_bg_light"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_info"
+                app:tint="@color/Deep_Navy"
+                android:layout_marginEnd="10dp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Your emergency contacts will receive your location and status message"
+                android:textColor="@color/Deep_Navy"
+                android:textSize="12sp"
+                android:lineSpacingExtra="1dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
 </ScrollView>

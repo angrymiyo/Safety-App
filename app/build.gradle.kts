@@ -90,6 +90,9 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 
+    // Image Cropper
+    implementation ("com.vanniktech:android-image-cropper:4.5.0")
+
     // CameraX for modern video recording
     implementation ("androidx.camera:camera-core:1.3.1")
     implementation ("androidx.camera:camera-camera2:1.3.1")

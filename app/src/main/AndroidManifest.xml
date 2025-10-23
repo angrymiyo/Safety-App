@@ -112,6 +112,10 @@
         <activity
             android:name=".ProfileActivity"
             android:parentActivityName=".MainActivity" />
+        <!-- Image Cropper Activity -->
+        <activity
+            android:name="com.canhub.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
         <activity android:name=".LiveLocation" />
         <activity android:name=".SignupActivity" />
         <activity android:name=".LoginActivity" />

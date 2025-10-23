@@ -148,10 +148,10 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
                                 Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
                                 navProfileImage.setImageBitmap(bitmap);
                             } catch (Exception e) {
-                                navProfileImage.setImageResource(R.drawable.ic_profile);
+                                navProfileImage.setImageResource(R.drawable.user_profile);
                             }
                         } else {
-                            navProfileImage.setImageResource(R.drawable.ic_profile);
+                            navProfileImage.setImageResource(R.drawable.user_profile);
                         }
                     } else {
                         navUserName.setText(mAuth.getCurrentUser().getDisplayName() != null ?

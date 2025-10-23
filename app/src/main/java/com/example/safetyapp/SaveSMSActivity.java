@@ -35,7 +35,7 @@ public class SaveSMSActivity extends BaseActivity {
     private ContactsAdapter adapter;
     private List<Contact> contacts = new ArrayList<>();
 
-    private TextView tvNoContacts;
+    private View tvNoContacts;
     private RecyclerView rvContacts;
     private Button btnAddContact, btnSaveMessage;
     private EditText etEmergencyMessage;

@@ -20,6 +20,10 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
+import com.canhub.cropper.CropImageContract;
+import com.canhub.cropper.CropImageContractOptions;
+import com.canhub.cropper.CropImageOptions;
+import com.canhub.cropper.CropImageView;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -37,17 +41,19 @@ public class ProfileActivity extends BaseActivity {
     private EditText editName, editMobile, editEmail, editAddress;
     private MaterialButton editProfileButton;
     private ProgressBar progressBar;
-    private ImageView profileImageView;
+    private ImageView profileImageView, coverPhotoView;
+    private com.google.android.material.floatingactionbutton.FloatingActionButton btnEditCover, btnEditProfilePic;
 
     private DatabaseReference userRef;
     private FirebaseUser currentUser;
     private boolean isEditing = false;
-    private ActivityResultLauncher<Intent> imagePickerLauncher;
+    private boolean isSelectingCoverPhoto = false;
+    private ActivityResultLauncher<CropImageContractOptions> cropImageLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
+        setupLayout(R.layout.activity_profile, "Profile", true, R.id.nav_home, false);
 
         // Initialize views
         usernameTextView = findViewById(R.id.username);
@@ -65,6 +71,9 @@ public class ProfileActivity extends BaseActivity {
         editProfileButton = findViewById(R.id.btn_edit_profile);
         progressBar = findViewById(R.id.progressBar);
         profileImageView = findViewById(R.id.profile_image);
+        coverPhotoView = findViewById(R.id.cover_photo);
+        btnEditCover = findViewById(R.id.btn_edit_cover);
+        btnEditProfilePic = findViewById(R.id.btn_edit_profile_pic);
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
@@ -75,21 +84,32 @@ public class ProfileActivity extends BaseActivity {
 
         userRef = FirebaseDatabase.getInstance().getReference("Users").child(currentUser.getUid());
 
-        // Initialize image picker launcher
-        imagePickerLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
+        // Initialize crop image launcher
+        cropImageLauncher = registerForActivityResult(
+                new CropImageContract(),
                 result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                        Uri imageUri = result.getData().getData();
-                        if (imageUri != null) {
-                            saveImageToDatabase(imageUri);
+                    if (result.isSuccessful()) {
+                        Uri croppedUri = result.getUriContent();
+                        if (croppedUri != null) {
+                            if (isSelectingCoverPhoto) {
+                                saveCoverPhotoToDatabase(croppedUri);
+                            } else {
+                                saveProfilePictureToDatabase(croppedUri);
+                            }
+                        }
+                    } else {
+                        Exception error = result.getError();
+                        if (error != null) {
+                            Toast.makeText(this, "Cropping error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     }
                 }
         );
 
-        // Set click listener on profile image
-        profileImageView.setOnClickListener(v -> openImagePicker());
+        // Set click listeners for profile and cover photo
+        profileImageView.setOnClickListener(v -> openProfilePicturePicker());
+        btnEditProfilePic.setOnClickListener(v -> openProfilePicturePicker());
+        btnEditCover.setOnClickListener(v -> openCoverPhotoPicker());
 
         loadProfile();
 
@@ -115,6 +135,7 @@ public class ProfileActivity extends BaseActivity {
                     String email = snapshot.child("email").getValue(String.class);
                     String address = snapshot.child("address").getValue(String.class);
                     String photoBase64 = snapshot.child("photoBase64").getValue(String.class);
+                    String coverPhotoBase64 = snapshot.child("coverPhotoBase64").getValue(String.class);
 
                     textName.setText("Name: " + (name != null ? name : ""));
                     textMobile.setText("Mobile: " + (mobile != null ? mobile : ""));
@@ -135,6 +156,17 @@ public class ProfileActivity extends BaseActivity {
                         }
                     } else {
                         profileImageView.setImageResource(R.drawable.user_profile);
+                    }
+
+                    // Load cover photo if available
+                    if (coverPhotoBase64 != null && !coverPhotoBase64.isEmpty()) {
+                        try {
+                            byte[] decodedBytes = Base64.decode(coverPhotoBase64, Base64.DEFAULT);
+                            Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                            coverPhotoView.setImageBitmap(bitmap);
+                        } catch (Exception e) {
+                            // Keep default gradient background
+                        }
                     }
                 }
             }
@@ -170,20 +202,26 @@ public class ProfileActivity extends BaseActivity {
         String email = editEmail.getText().toString().trim();
         String address = editAddress.getText().toString().trim();
 
-        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(mobile) || TextUtils.isEmpty(email) || TextUtils.isEmpty(address)) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         progressBar.setVisibility(View.VISIBLE);
 
         HashMap<String, Object> profileMap = new HashMap<>();
-        profileMap.put("name", name);
-        profileMap.put("mobile", mobile);
-        profileMap.put("email", email);
-        profileMap.put("address", address);
 
-        userRef.setValue(profileMap).addOnCompleteListener(task -> {
+        // Only add fields that have values (making all fields optional)
+        if (!TextUtils.isEmpty(name)) {
+            profileMap.put("name", name);
+        }
+        if (!TextUtils.isEmpty(mobile)) {
+            profileMap.put("mobile", mobile);
+        }
+        if (!TextUtils.isEmpty(email)) {
+            profileMap.put("email", email);
+        }
+        if (!TextUtils.isEmpty(address)) {
+            profileMap.put("address", address);
+        }
+
+        // Use updateChildren instead of setValue to only update provided fields
+        userRef.updateChildren(profileMap).addOnCompleteListener(task -> {
             progressBar.setVisibility(View.GONE);
             if (task.isSuccessful()) {
                 Toast.makeText(ProfileActivity.this, "Profile updated", Toast.LENGTH_SHORT).show();
@@ -205,13 +243,55 @@ public class ProfileActivity extends BaseActivity {
         });
     }
 
-    private void openImagePicker() {
-        Intent intent = new Intent(Intent.ACTION_PICK);
-        intent.setType("image/*");
-        imagePickerLauncher.launch(intent);
+    private void openProfilePicturePicker() {
+        isSelectingCoverPhoto = false;
+
+        CropImageOptions cropImageOptions = new CropImageOptions();
+        cropImageOptions.imageSourceIncludeGallery = true;
+        cropImageOptions.imageSourceIncludeCamera = true;
+        cropImageOptions.aspectRatioX = 1;
+        cropImageOptions.aspectRatioY = 1;
+        cropImageOptions.cropShape = CropImageView.CropShape.OVAL;
+        cropImageOptions.guidelines = CropImageView.Guidelines.ON;
+        cropImageOptions.fixAspectRatio = true;
+        cropImageOptions.outputCompressQuality = 80;
+        cropImageOptions.activityTitle = "Crop Profile Picture";
+        cropImageOptions.activityMenuIconColor = 0xFFFFFFFF;
+        cropImageOptions.allowRotation = true;
+        cropImageOptions.allowFlipping = true;
+        cropImageOptions.showCropOverlay = true;
+        cropImageOptions.showProgressBar = true;
+        cropImageOptions.autoZoomEnabled = true;
+
+        CropImageContractOptions cropImageContractOptions = new CropImageContractOptions(null, cropImageOptions);
+        cropImageLauncher.launch(cropImageContractOptions);
     }
 
-    private void saveImageToDatabase(Uri imageUri) {
+    private void openCoverPhotoPicker() {
+        isSelectingCoverPhoto = true;
+
+        CropImageOptions cropImageOptions = new CropImageOptions();
+        cropImageOptions.imageSourceIncludeGallery = true;
+        cropImageOptions.imageSourceIncludeCamera = true;
+        cropImageOptions.aspectRatioX = 16;
+        cropImageOptions.aspectRatioY = 9;
+        cropImageOptions.cropShape = CropImageView.CropShape.RECTANGLE;
+        cropImageOptions.guidelines = CropImageView.Guidelines.ON;
+        cropImageOptions.fixAspectRatio = true;
+        cropImageOptions.outputCompressQuality = 80;
+        cropImageOptions.activityTitle = "Crop Cover Photo";
+        cropImageOptions.activityMenuIconColor = 0xFFFFFFFF;
+        cropImageOptions.allowRotation = true;
+        cropImageOptions.allowFlipping = true;
+        cropImageOptions.showCropOverlay = true;
+        cropImageOptions.showProgressBar = true;
+        cropImageOptions.autoZoomEnabled = true;
+
+        CropImageContractOptions cropImageContractOptions = new CropImageContractOptions(null, cropImageOptions);
+        cropImageLauncher.launch(cropImageContractOptions);
+    }
+
+    private void saveProfilePictureToDatabase(Uri imageUri) {
         if (currentUser == null) {
             Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
             return;
@@ -245,6 +325,52 @@ public class ProfileActivity extends BaseActivity {
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(ProfileActivity.this, "Failed to update profile picture: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+
+            inputStream.close();
+            outputStream.close();
+
+        } catch (Exception e) {
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(this, "Failed to process image: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void saveCoverPhotoToDatabase(Uri imageUri) {
+        if (currentUser == null) {
+            Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        progressBar.setVisibility(View.VISIBLE);
+
+        try {
+            // Read the image from URI
+            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+            // Compress and resize the image (wider for cover photo)
+            Bitmap resizedBitmap = resizeBitmap(bitmap, 800, 400);
+
+            // Convert to Base64
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream);
+            byte[] imageBytes = outputStream.toByteArray();
+            String base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+
+            // Save to Firebase Realtime Database
+            userRef.child("coverPhotoBase64").setValue(base64Image)
+                .addOnSuccessListener(aVoid -> {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(ProfileActivity.this, "Cover photo updated successfully", Toast.LENGTH_SHORT).show();
+
+                    // Display the image
+                    coverPhotoView.setImageBitmap(resizedBitmap);
+                    coverPhotoView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                })
+                .addOnFailureListener(e -> {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(ProfileActivity.this, "Failed to update cover photo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
 
             inputStream.close();

@@ -1,120 +1,374 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/Light_Sky_Blue"
-    android:padding="16dp">
-    <!-- Instruction text -->
-    <TextView
+    android:background="#F5F5F5"
+    android:fillViewport="true">
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save an emergency contact to send a text message with your location."
-        android:textSize="16sp"
-        android:textColor="@android:color/black" />
+        android:orientation="vertical">
 
-    <!-- Add emergency contact button -->
-    <Button
-        android:id="@+id/btn_add_contact"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:drawableEnd="@drawable/ic_add"
-        android:drawableRight="@drawable/ic_add"
-        android:drawablePadding="8dp"
-        android:backgroundTint="@color/Deep_Navy"
-        android:text="Add emergency contact's"
-        android:textAllCaps="false"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        <!-- Header Section -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/gradient_background"
+            android:paddingTop="20dp"
+            android:paddingBottom="24dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp">
 
-    <!-- Divider -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Emergency Contacts"
-        android:textAlignment="center"
-        android:textColor="@color/Deep_Navy"
-        android:textSize="18dp"
-        android:textStyle="bold" />
+            <!-- SMS Icon -->
+            <ImageView
+                android:id="@+id/iv_sms_icon"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:src="@drawable/ic_sms"
+                android:background="@drawable/circle_white_bg"
+                android:padding="14dp"
+                app:tint="@color/Deep_Navy"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:elevation="4dp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginVertical="16dp"
-        android:background="@android:color/darker_gray" />
+            <!-- Title Text -->
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Emergency SMS Setup"
+                android:textSize="20sp"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                app:layout_constraintTop_toBottomOf="@id/iv_sms_icon"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
+            <TextView
+                android:id="@+id/tv_subtitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Add contacts and configure emergency messages"
+                android:textSize="13sp"
+                android:textColor="#E0E0E0"
+                android:alpha="0.9"
+                android:textAlignment="center"
+                app:layout_constraintTop_toBottomOf="@id/tv_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_contacts"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Save Custom Message:"
-        android:textColor="@color/Deep_Navy"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        <!-- Add Contact Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="-16dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@android:color/white">
 
-    <EditText
-        android:id="@+id/et_emergency_message"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_marginTop="8dp"
-        android:background="@android:color/white"
-        android:gravity="top"
-        android:padding="12dp"
-        android:hint="Enter your message..."
-        android:textColor="@android:color/black"
-        android:inputType="textMultiLine" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
 
-    <Button
-        android:id="@+id/btn_save_message"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Save Message"
-        android:backgroundTint="@color/Deep_Navy"
-        android:textColor="@android:color/white" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Emergency Contacts"
+                    android:textColor="@color/Deep_Navy"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    android:layout_marginBottom="8dp" />
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Add contacts who will receive your emergency messages with location"
+                    android:textSize="13sp"
+                    android:textColor="#6C757D"
+                    android:lineSpacingExtra="2dp"
+                    android:layout_marginBottom="16dp" />
 
-    <!-- Countdown dropdown -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Countdown timer to abort sending message:"
-        android:textColor="@android:color/black"
-        android:textSize="12dp"
-        android:textStyle="bold" />
+                <!-- Add Contact Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_add_contact"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:text="Add Emergency Contact"
+                    android:textColor="@android:color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    app:icon="@drawable/ic_add"
+                    app:iconGravity="textStart"
+                    app:iconPadding="10dp"
+                    app:iconTint="@android:color/white"
+                    android:backgroundTint="@color/Deep_Navy"
+                    app:cornerRadius="12dp"
+                    android:elevation="2dp" />
 
-    <Spinner
-        android:id="@+id/spinner_countdown"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:spinnerMode="dropdown"
-        android:textColor="@color/black"
-        android:backgroundTint="@color/black"
-        android:padding="8dp"
-        android:layout_gravity="start" />
+                <!-- Contacts RecyclerView -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_contacts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:nestedScrollingEnabled="false" />
 
-    <!-- Contacts Section -->
+                <!-- No Contacts Message -->
+                <LinearLayout
+                    android:id="@+id/tv_no_contacts"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="24dp"
+                    android:visibility="gone">
 
-    <TextView
-        android:id="@+id/tv_no_contacts"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="No contacts added"
-        android:textColor="@color/Deep_Navy"
-        android:layout_marginTop="12dp"
-        android:visibility="gone"
-        android:textAlignment="center" />
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/contact_phone_24"
+                        app:tint="#BDBDBD"
+                        android:layout_marginBottom="12dp" />
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="No contacts added yet"
+                        android:textColor="#9E9E9E"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
 
-</LinearLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Add your first emergency contact"
+                        android:textColor="#BDBDBD"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Custom Message Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/message_24"
+                        app:tint="@color/Deep_Navy"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Custom Emergency Message"
+                        android:textColor="@color/Deep_Navy"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="This message will be sent to your emergency contacts"
+                    android:textSize="13sp"
+                    android:textColor="#6C757D"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Message Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter emergency message"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusTopStart="12dp"
+                    app:boxCornerRadiusTopEnd="12dp"
+                    app:boxCornerRadiusBottomStart="12dp"
+                    app:boxCornerRadiusBottomEnd="12dp"
+                    app:boxStrokeColor="@color/Light_Sky_Blue"
+                    app:hintTextColor="@color/Deep_Navy"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_emergency_message"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine"
+                        android:minLines="3"
+                        android:maxLines="5"
+                        android:gravity="top|start"
+                        android:textColor="@color/Deep_Navy"
+                        android:textSize="14sp"
+                        android:padding="12dp" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Save Message Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_save_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Save Message"
+                    android:textColor="@android:color/white"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    app:icon="@drawable/ic_save"
+                    app:iconGravity="textStart"
+                    app:iconPadding="10dp"
+                    app:iconTint="@android:color/white"
+                    android:backgroundTint="@color/Deep_Navy"
+                    app:cornerRadius="12dp"
+                    android:elevation="2dp" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Countdown Timer Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_clock"
+                        app:tint="@color/Deep_Navy"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Abort Timer"
+                        android:textColor="@color/Deep_Navy"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Time to cancel before sending emergency message"
+                    android:textSize="13sp"
+                    android:textColor="#6C757D"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Countdown Spinner -->
+                <Spinner
+                    android:id="@+id/spinner_countdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@color/Deep_Navy"
+                    android:spinnerMode="dropdown"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    style="@style/Widget.AppCompat.Spinner"
+                    android:popupBackground="@android:color/white" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Info Banner -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:padding="12dp"
+            android:background="@drawable/rounded_bg_light"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_info"
+                app:tint="@color/Deep_Navy"
+                android:layout_marginEnd="10dp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Emergency SMS will be sent automatically when triggered with your current location"
+                android:textColor="@color/Deep_Navy"
+                android:textSize="12sp"
+                android:lineSpacingExtra="1dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
