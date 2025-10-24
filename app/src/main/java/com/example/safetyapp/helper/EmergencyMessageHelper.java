@@ -22,8 +22,6 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.safetyapp.Contact;
-import com.facebook.share.model.ShareLinkContent;
-import com.facebook.share.widget.ShareDialog;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -163,8 +161,6 @@ public class EmergencyMessageHelper {
                         sendWhatsApp(contact.getPhone(), customMessage);
                     }
                 }
-
-                // Don't post to Facebook for SOS custom messages
             }
 
             @Override

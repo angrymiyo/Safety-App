@@ -1,11 +1,18 @@
 package com.example.safetyapp;
 
 import android.content.Intent;
+import android.graphics.LinearGradient;
+import android.graphics.Shader;
 import android.os.Bundle;
+import android.text.TextPaint;
 import android.text.TextUtils;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,11 +29,26 @@ public class SignupActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private boolean isPasswordVisible = false;
+    private boolean isConfirmPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
+
+        // Apply gradient to welcome text
+        TextView welcomeText = findViewById(R.id.welcomeText);
+        TextPaint paint = welcomeText.getPaint();
+        float width = paint.measureText(welcomeText.getText().toString());
+
+        Shader textShader = new LinearGradient(0, 0, width, welcomeText.getTextSize(),
+                new int[]{
+                    0xFF667eea,
+                    0xFF764ba2,
+                    0xFFf093fb
+                }, null, Shader.TileMode.CLAMP);
+        welcomeText.getPaint().setShader(textShader);
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -35,6 +57,42 @@ public class SignupActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.et_password);
         etConfirmPassword = findViewById(R.id.inputConfirmPassword);
         progressBar = findViewById(R.id.progress_bar);
+
+        // Password visibility toggle
+        ImageView togglePasswordVisibility = findViewById(R.id.togglePasswordVisibility);
+        togglePasswordVisibility.setOnClickListener(v -> {
+            if (isPasswordVisible) {
+                // Hide password
+                etPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                togglePasswordVisibility.setImageResource(R.drawable.ic_eye_closed);
+                isPasswordVisible = false;
+            } else {
+                // Show password
+                etPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                togglePasswordVisibility.setImageResource(R.drawable.ic_eye_open);
+                isPasswordVisible = true;
+            }
+            // Move cursor to end of text
+            etPassword.setSelection(etPassword.getText().length());
+        });
+
+        // Confirm Password visibility toggle
+        ImageView toggleConfirmPasswordVisibility = findViewById(R.id.toggleConfirmPasswordVisibility);
+        toggleConfirmPasswordVisibility.setOnClickListener(v -> {
+            if (isConfirmPasswordVisible) {
+                // Hide password
+                etConfirmPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                toggleConfirmPasswordVisibility.setImageResource(R.drawable.ic_eye_closed);
+                isConfirmPasswordVisible = false;
+            } else {
+                // Show password
+                etConfirmPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                toggleConfirmPasswordVisibility.setImageResource(R.drawable.ic_eye_open);
+                isConfirmPasswordVisible = true;
+            }
+            // Move cursor to end of text
+            etConfirmPassword.setSelection(etConfirmPassword.getText().length());
+        });
 
         findViewById(R.id.btn_signup).setOnClickListener(v -> signupUser());
         findViewById(R.id.btn_go_to_login).setOnClickListener(v ->

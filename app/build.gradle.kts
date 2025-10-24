@@ -77,7 +77,6 @@ dependencies {
     implementation ("com.google.android.gms:play-services-location:21.3.0")
     implementation ("com.google.android.gms:play-services-auth:21.3.0")
     implementation ("jp.wasabeef:blurry:4.0.0")
-    implementation ("com.facebook.android:facebook-android-sdk:latest.release")
     implementation ("androidx.browser:browser:1.5.0")
 
     // TensorFlow Lite (standard version only - removes ~400MB!)

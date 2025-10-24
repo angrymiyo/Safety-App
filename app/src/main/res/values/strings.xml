@@ -2,10 +2,6 @@
 <!--    <string name="app_name">SafetyApp</string>-->
     <string name="app_name">নির্ভয়</string>
     <string name="welcome_message">Welcome to নির্ভয়!</string>
-    <string name="facebook_app_id">607874032340277</string>
-    <string name="fb_login_protocol_scheme">fb607874032340277</string>
-    <string name="facebook_client_token">f29d7ddff395f39fff51127a32952b20</string>
-
 
     <string-array name="press_count_options">
         <item>2</item>
