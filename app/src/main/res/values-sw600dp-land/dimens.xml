@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tablet landscape dimensions -->
+    <!-- Text sizes -->
+    <dimen name="text_welcome">20sp</dimen>
+    <dimen name="text_app_name">32sp</dimen>
+    <dimen name="text_section_title">24sp</dimen>
+    <dimen name="text_card_title">14sp</dimen>
+
+    <!-- SOS Button - adjusted for landscape tablet -->
+    <dimen name="sos_card_size">200dp</dimen>
+    <dimen name="sos_button_size">100dp</dimen>
+    <dimen name="sos_pulse_outer">145dp</dimen>
+    <dimen name="sos_pulse_middle">125dp</dimen>
+    <dimen name="sos_text_size">28sp</dimen>
+
+    <!-- Card dimensions -->
+    <dimen name="feature_card_height">120dp</dimen>
+    <dimen name="feature_icon_size">52dp</dimen>
+    <dimen name="card_corner_radius">20dp</dimen>
+    <dimen name="card_elevation">6dp</dimen>
+    <dimen name="card_padding">18dp</dimen>
+
+    <!-- Spacing -->
+    <dimen name="spacing_small">8dp</dimen>
+    <dimen name="spacing_medium">14dp</dimen>
+    <dimen name="spacing_large">20dp</dimen>
+    <dimen name="spacing_xlarge">28dp</dimen>
+    <dimen name="spacing_xxlarge">32dp</dimen>
+    <dimen name="padding_screen">32dp</dimen>
+    <dimen name="padding_top">40dp</dimen>
+</resources>

@@ -1,22 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/Light_Sky_Blue"
+    android:background="@drawable/gradient_background_emergency"
     android:padding="16dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Select a service to call immediately"
-        android:textSize="16sp"
-        android:textColor="@android:color/black"
-        android:paddingBottom="8dp"
-        android:textStyle="bold" />
+        android:text="🚨 Emergency Services"
+        android:textSize="22sp"
+        android:textColor="@android:color/white"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:shadowColor="#40000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="4" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_services"
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:text="Select a service to call immediately"
+        android:textSize="14sp"
+        android:textColor="#E9D5FF"
+        android:paddingBottom="12dp"
+        android:alpha="0.95" />
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:columnCount="2"
+        android:rowCount="3"
+        android:alignmentMode="alignBounds"
+        android:columnOrderPreserved="false"
+        android:useDefaultMargins="false">
+
+        <!-- Police -->
+        <include
+            android:id="@+id/service_police"
+            layout="@layout/item_emergency_service"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="0"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp" />
+
+        <!-- Ambulance -->
+        <include
+            android:id="@+id/service_ambulance"
+            layout="@layout/item_emergency_service"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="0"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp" />
+
+        <!-- Fire Service -->
+        <include
+            android:id="@+id/service_fire"
+            layout="@layout/item_emergency_service"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="1"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp" />
+
+        <!-- Local Hospital -->
+        <include
+            android:id="@+id/service_hospital"
+            layout="@layout/item_emergency_service"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="1"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp" />
+
+        <!-- Child Helpline -->
+        <include
+            android:id="@+id/service_child"
+            layout="@layout/item_emergency_service"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="2"
+            android:layout_column="0"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp" />
+
+        <!-- Violence Against Women -->
+        <include
+            android:id="@+id/service_women"
+            layout="@layout/item_emergency_service"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_row="2"
+            android:layout_column="1"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
+            android:layout_margin="4dp" />
+
+    </GridLayout>
 </LinearLayout>

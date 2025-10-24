@@ -3,19 +3,12 @@ package com.example.safetyapp;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.safetyapp.adapter.EmergencyServiceAdapter;
-import com.example.safetyapp.service.EmergencyService;
-
-import java.util.Arrays;
-import java.util.List;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 public class InCaseEmergencyActivity extends BaseActivity {
-
-    private RecyclerView rvServices;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,24 +17,34 @@ public class InCaseEmergencyActivity extends BaseActivity {
         // Setup layout with toolbar, back button, and no bottom nav
         setupLayout(R.layout.activity_in_case_emergency, "Emergency Services", true, R.id.nav_home, false);
 
-        rvServices = findViewById(R.id.rv_services);
-        rvServices.setLayoutManager(new LinearLayoutManager(this));
+        // Setup all emergency services
+        setupService(R.id.service_police, "Police", "999", R.drawable.e911_emergency_24px);
+        setupService(R.id.service_ambulance, "Ambulance", "103", R.drawable.ambulance_24px);
+        setupService(R.id.service_fire, "Fire Service", "102", R.drawable.fire_truck_24px);
+        setupService(R.id.service_hospital, "Local Hospital", "16263", R.drawable.ambulance_24px);
+        setupService(R.id.service_child, "Child Helpline", "1098", R.drawable.account_child_24px);
+        setupService(R.id.service_women, "Violence Against Women", "109", R.drawable.account_child_24px);
+    }
 
-        List<EmergencyService> services = Arrays.asList(
-                new EmergencyService("Police", "999", R.drawable.e911_emergency_24px),
-                new EmergencyService("Ambulance", "103", R.drawable.ambulance_24px),
-                new EmergencyService("Fire Service", "102", R.drawable.fire_truck_24px),
-                new EmergencyService("Local Hospital", "16263", R.drawable.ambulance_24px),
-                new EmergencyService("Child Helpline", "1098", R.drawable.account_child_24px),
-                new EmergencyService("violence against women and children","109", R.drawable.account_child_24px)
-        );
+    private void setupService(int serviceId, String name, String phone, int iconRes) {
+        View serviceView = findViewById(serviceId);
 
-        EmergencyServiceAdapter adapter = new EmergencyServiceAdapter(services, service -> {
+        ImageView icon = serviceView.findViewById(R.id.iv_service_icon);
+        TextView nameText = serviceView.findViewById(R.id.tv_service_name);
+        TextView phoneText = serviceView.findViewById(R.id.tv_service_phone);
+        Button callButton = serviceView.findViewById(R.id.btn_call_service);
+
+        icon.setImageResource(iconRes);
+        nameText.setText(name);
+        phoneText.setText(phone);
+
+        View.OnClickListener callListener = v -> {
             Intent callIntent = new Intent(Intent.ACTION_DIAL);
-            callIntent.setData(Uri.parse("tel:" + service.getPhone()));
+            callIntent.setData(Uri.parse("tel:" + phone));
             startActivity(callIntent);
-        });
+        };
 
-        rvServices.setAdapter(adapter);
+        callButton.setOnClickListener(callListener);
+        serviceView.setOnClickListener(callListener);
     }
 }

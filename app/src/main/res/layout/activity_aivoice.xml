@@ -10,16 +10,11 @@
     tools:context=".AIVoiceActivity">
 
     <!-- Main Content -->
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10dp">
+        android:orientation="vertical"
+        android:padding="12dp">
 
             <!-- Header Section -->
             <LinearLayout
@@ -27,14 +22,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:paddingTop="6dp"
+                android:paddingTop="4dp"
                 android:paddingBottom="8dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="🎙️ AI Voice Guardian"
-                    android:textSize="20sp"
+                    android:textSize="17sp"
                     android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:shadowColor="#40000000"
@@ -56,7 +51,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="12dp"
+                    android:padding="14dp"
                     android:gravity="center">
 
                     <!-- Status Indicator -->
@@ -65,7 +60,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="8dp"
+                        android:padding="2dp">
 
                         <View
                             android:id="@+id/status_indicator"
@@ -113,7 +109,7 @@
                             android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="7dp"
+                            android:padding="10dp"
                             android:background="@drawable/stat_card_background"
                             android:layout_marginEnd="5dp">
 
@@ -142,7 +138,7 @@
                             android:layout_weight="1"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="7dp"
+                            android:padding="10dp"
                             android:background="@drawable/stat_card_background"
                             android:layout_marginStart="5dp">
 
@@ -168,9 +164,10 @@
                     <!-- Voice Wave Animation Container - REDUCED -->
                     <FrameLayout
                         android:layout_width="match_parent"
-                        android:layout_height="80dp"
+                        android:layout_height="75dp"
                         android:background="@drawable/voice_wave_background"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="8dp"
+                        android:padding="6dp">
 
                         <include layout="@layout/voice_wave_animation"/>
 
@@ -184,12 +181,12 @@
 
                             <ImageView
                                 android:id="@+id/iv_microphone"
-                                android:layout_width="42dp"
-                                android:layout_height="42dp"
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
                                 android:src="@drawable/ic_microphone"
                                 android:tint="#5E35B1"
                                 android:elevation="5dp"
-                                android:padding="9dp"
+                                android:padding="7dp"
                                 android:background="@drawable/circle_white_shadow"/>
 
                             <TextView
@@ -197,10 +194,10 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="0%"
-                                android:textSize="11sp"
+                                android:textSize="10sp"
                                 android:textColor="#5E35B1"
                                 android:textStyle="bold"
-                                android:layout_marginTop="3dp"/>
+                                android:layout_marginTop="2dp"/>
                         </LinearLayout>
                     </FrameLayout>
 
@@ -210,7 +207,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="8dp"
+                        android:padding="2dp">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -241,6 +239,7 @@
                         android:textSize="10sp"
                         android:textColor="#546E7A"
                         android:gravity="center"
+                        android:padding="6dp"
                         android:minHeight="20dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -251,8 +250,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                app:cardCornerRadius="11dp"
-                app:cardElevation="3dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="4dp"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
@@ -267,7 +266,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:padding="12dp"
+                        android:padding="14dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
@@ -276,7 +275,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🇬🇧"
-                            android:textSize="18sp"
+                            android:textSize="16sp"
                             android:layout_marginEnd="7dp"/>
 
                         <LinearLayout
@@ -304,8 +303,8 @@
 
                         <ImageView
                             android:id="@+id/icon_expand_english"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
                             android:src="@drawable/ic_expand_more"
                             android:tint="#1976D2"/>
                     </LinearLayout>
@@ -316,8 +315,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="16dp"
-                        android:paddingTop="0dp"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:paddingBottom="14dp"
+                        android:paddingTop="2dp"
                         android:visibility="gone">
 
                         <!-- Common SOS -->
@@ -404,8 +405,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                app:cardCornerRadius="11dp"
-                app:cardElevation="3dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="4dp"
                 app:cardBackgroundColor="#FFFFFF">
 
                 <LinearLayout
@@ -420,7 +421,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:padding="12dp"
+                        android:padding="14dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
@@ -429,7 +430,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🇧🇩"
-                            android:textSize="18sp"
+                            android:textSize="16sp"
                             android:layout_marginEnd="7dp"/>
 
                         <LinearLayout
@@ -457,8 +458,8 @@
 
                         <ImageView
                             android:id="@+id/icon_expand_bangla"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
                             android:src="@drawable/ic_expand_more"
                             android:tint="#F57C00"/>
                     </LinearLayout>
@@ -469,8 +470,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="16dp"
-                        android:paddingTop="0dp"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:paddingBottom="14dp"
+                        android:paddingTop="2dp"
                         android:visibility="gone">
 
                         <!-- Common SOS -->
@@ -556,8 +559,8 @@
                 android:id="@+id/card_speech_recognition"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="11dp"
+                android:layout_marginBottom="6dp"
+                app:cardCornerRadius="12dp"
                 app:cardElevation="3dp"
                 app:cardBackgroundColor="#FFFFFF"
                 android:visibility="gone">
@@ -630,8 +633,8 @@
                         android:layout_marginBottom="8dp">
 
                         <ImageView
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
                             android:src="@drawable/ic_voice_enrollment"
                             android:tint="#1976D2"
                             android:padding="5dp"
@@ -648,7 +651,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Voice Enrollment"
-                                android:textSize="14sp"
+                                android:textSize="13sp"
                                 android:textColor="#1976D2"
                                 android:textStyle="bold"
                                 android:layout_marginBottom="2dp"/>
@@ -667,26 +670,21 @@
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_enroll_voice"
                         android:layout_width="match_parent"
-                        android:layout_height="40dp"
+                        android:layout_height="38dp"
                         android:text="Enroll My Voice"
                         android:textSize="12sp"
                         android:textStyle="bold"
-                        app:cornerRadius="20dp"
+                        app:cornerRadius="19dp"
                         app:icon="@drawable/ic_fingerprint"
                         app:iconGravity="textStart"
-                        app:iconSize="17dp"
+                        app:iconSize="16dp"
                         app:backgroundTint="#1976D2"
                         android:textColor="@android:color/white"
                         android:elevation="3dp"/>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Bottom Spacing -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="15dp"/>
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 
     <!-- Emergency Detection Overlay (Hidden by default) -->
     <include

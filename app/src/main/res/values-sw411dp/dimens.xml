@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Large phone dimensions (411dp+) -->
+    <!-- Text sizes -->
+    <dimen name="text_welcome">17sp</dimen>
+    <dimen name="text_app_name">26sp</dimen>
+    <dimen name="text_section_title">19sp</dimen>
+    <dimen name="text_card_title">11sp</dimen>
+
+    <!-- SOS Button - slightly larger for big screens -->
+    <dimen name="sos_card_size">190dp</dimen>
+    <dimen name="sos_button_size">95dp</dimen>
+    <dimen name="sos_pulse_outer">135dp</dimen>
+    <dimen name="sos_pulse_middle">115dp</dimen>
+    <dimen name="sos_text_size">26sp</dimen>
+
+    <!-- Card dimensions -->
+    <dimen name="feature_card_height">120dp</dimen>
+    <dimen name="feature_icon_size">44dp</dimen>
+    <dimen name="card_corner_radius">18dp</dimen>
+    <dimen name="card_elevation">5dp</dimen>
+    <dimen name="card_padding">14dp</dimen>
+
+    <!-- Spacing -->
+    <dimen name="spacing_small">6dp</dimen>
+    <dimen name="spacing_medium">12dp</dimen>
+    <dimen name="spacing_large">18dp</dimen>
+    <dimen name="spacing_xlarge">24dp</dimen>
+    <dimen name="spacing_xxlarge">28dp</dimen>
+    <dimen name="padding_screen">20dp</dimen>
+    <dimen name="padding_top">48dp</dimen>
+</resources>
