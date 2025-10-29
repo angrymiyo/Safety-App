@@ -22,19 +22,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Customize your safety preferences"
-        android:textColor="@color/white"
+        android:textColor="#000000"
         android:textSize="12sp"
-        android:alpha="0.85"
+        android:textStyle="bold"
         android:layout_marginBottom="20dp"
-        android:fontFamily="sans-serif-light"/>
+        android:fontFamily="sans-serif-medium"/>
 
     <!-- Settings List -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center_vertical">
+        android:orientation="vertical">
 
         <!-- Sound Card -->
         <androidx.cardview.widget.CardView
@@ -57,7 +56,7 @@
                     android:layout_height="40dp"
                     android:src="@drawable/ic_sound"
                     android:layout_marginEnd="16dp"
-                    app:tint="@color/Deep_Navy" />
+                    app:tint="#5245A1" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -73,8 +72,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    app:trackTint="@color/accent_teal"
-                    app:thumbTint="@color/white" />
+                    app:trackTint="@color/switch_track_selector"
+                    app:thumbTint="@color/switch_thumb_selector" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -99,7 +98,7 @@
                     android:layout_height="40dp"
                     android:src="@drawable/ic_vibration"
                     android:layout_marginEnd="16dp"
-                    app:tint="@color/Deep_Navy" />
+                    app:tint="#5245A1" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -115,8 +114,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true"
-                    app:trackTint="@color/accent_teal"
-                    app:thumbTint="@color/white" />
+                    app:trackTint="@color/switch_track_selector"
+                    app:thumbTint="@color/switch_thumb_selector" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -141,7 +140,7 @@
                     android:layout_height="40dp"
                     android:src="@drawable/account_child_24px"
                     android:layout_marginEnd="16dp"
-                    app:tint="@color/Deep_Navy" />
+                    app:tint="#5245A1" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -156,8 +155,8 @@
                     android:id="@+id/switch_contacts"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:trackTint="@color/accent_teal"
-                    app:thumbTint="@color/white" />
+                    app:trackTint="@color/switch_track_selector"
+                    app:thumbTint="@color/switch_thumb_selector" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -182,7 +181,7 @@
                     android:layout_height="40dp"
                     android:src="@drawable/ic_voice"
                     android:layout_marginEnd="16dp"
-                    app:tint="@color/Deep_Navy" />
+                    app:tint="#5245A1" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -197,8 +196,8 @@
                     android:id="@+id/switch_voice_detection"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:trackTint="@color/accent_teal"
-                    app:thumbTint="@color/white" />
+                    app:trackTint="@color/switch_track_selector"
+                    app:thumbTint="@color/switch_thumb_selector" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
@@ -223,7 +222,7 @@
                     android:layout_height="40dp"
                     android:src="@drawable/power_press"
                     android:layout_marginEnd="16dp"
-                    app:tint="@color/Deep_Navy" />
+                    app:tint="#5245A1" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -263,7 +262,7 @@
                     android:layout_height="40dp"
                     android:src="@drawable/ic_shaker"
                     android:layout_marginEnd="16dp"
-                    app:tint="@color/Deep_Navy" />
+                    app:tint="#5245A1" />
 
                 <TextView
                     android:layout_width="0dp"

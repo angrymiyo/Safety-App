@@ -15,4 +15,10 @@
         <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
+    <style name="SpinnerTheme" parent="Theme.AppCompat.Light">
+        <item name="android:textColorPrimary">#FFFFFF</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="colorControlNormal">#FFFFFF</item>
+    </style>
+
 </resources>

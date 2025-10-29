@@ -24,7 +24,7 @@
         android:src="@drawable/ic_menu"
         android:contentDescription="Menu"
         android:padding="8dp"
-        app:tint="@android:color/white" />
+        app:tint="#FFFFFF" />
 
     <!-- Welcome Text Section -->
     <LinearLayout
@@ -91,44 +91,53 @@
                     android:padding="15dp">
 
                     <!-- Outer pulse ring -->
-                    <View
+                    <ImageView
                         android:id="@+id/pulse_ring"
                         android:layout_width="118dp"
                         android:layout_height="118dp"
                         android:layout_gravity="center"
                         android:alpha="0.25"
-                        android:background="@drawable/pulse_ring_bg" />
+                        android:scaleType="fitXY"
+                        android:src="@drawable/pulse_ring_bg" />
 
                     <!-- Middle pulse -->
-                    <View
+                    <ImageView
                         android:id="@+id/pulse_view"
                         android:layout_width="102dp"
                         android:layout_height="102dp"
                         android:layout_gravity="center"
                         android:alpha="0.35"
-                        android:background="@drawable/sos_button_bg" />
+                        android:src="@drawable/sos_button_bg"
+                        android:scaleType="fitXY" />
 
                     <!-- SOS Button -->
-                    <FrameLayout
-                        android:id="@+id/btn_sos"
+                    <androidx.cardview.widget.CardView
                         android:layout_width="86dp"
                         android:layout_height="86dp"
                         android:layout_gravity="center"
-                        android:background="@drawable/red_circle"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:elevation="6dp">
+                        app:cardCornerRadius="43dp"
+                        app:cardElevation="6dp"
+                        app:cardBackgroundColor="#00000000">
 
-                        <TextView
+                        <FrameLayout
+                            android:id="@+id/btn_sos"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:text="SOS"
-                            android:textColor="@android:color/white"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:fontFamily="sans-serif-black"/>
-                    </FrameLayout>
+                            android:background="@drawable/red_circle"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:text="SOS"
+                                android:textColor="@android:color/white"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-black"/>
+                        </FrameLayout>
+                    </androidx.cardview.widget.CardView>
                 </FrameLayout>
             </androidx.cardview.widget.CardView>
 
@@ -173,28 +182,28 @@
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
                         app:cardCornerRadius="15dp"
-                        app:cardElevation="6dp"
-                        app:cardBackgroundColor="#4A90E2">
+                        app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="10dp">
+                            android:padding="10dp"
+                            android:background="@drawable/card_gradient_1">
 
                             <ImageView
                                 android:layout_width="36dp"
                                 android:layout_height="36dp"
                                 android:src="@drawable/contact_msgl_24"
-                                app:tint="@color/white"
+                                app:tint="#5245A1"
                                 android:layout_marginBottom="6dp"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Emergency Contacts"
-                                android:textColor="@color/white"
+                                android:textColor="#50469C"
                                 android:textSize="10sp"
                                 android:textStyle="bold"
                                 android:gravity="center"
@@ -210,28 +219,28 @@
                         android:layout_weight="1"
                         android:layout_marginStart="8dp"
                         app:cardCornerRadius="15dp"
-                        app:cardElevation="6dp"
-                        app:cardBackgroundColor="#E74C3C">
+                        app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="10dp">
+                            android:padding="10dp"
+                            android:background="@drawable/card_gradient_2">
 
                             <ImageView
                                 android:layout_width="36dp"
                                 android:layout_height="36dp"
                                 android:src="@drawable/voice_24"
-                                app:tint="@color/white"
+                                app:tint="#5245A1"
                                 android:layout_marginBottom="6dp"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="AI Voice Guardian"
-                                android:textColor="@color/white"
+                                android:textColor="#50469C"
                                 android:textSize="10sp"
                                 android:textStyle="bold"
                                 android:gravity="center"
@@ -256,28 +265,28 @@
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
                         app:cardCornerRadius="15dp"
-                        app:cardElevation="6dp"
-                        app:cardBackgroundColor="#F39C12">
+                        app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="10dp">
+                            android:padding="10dp"
+                            android:background="@drawable/card_gradient_3">
 
                             <ImageView
                                 android:layout_width="36dp"
                                 android:layout_height="36dp"
                                 android:src="@drawable/share_location_24"
-                                app:tint="@color/white"
+                                app:tint="#5245A1"
                                 android:layout_marginBottom="6dp"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Live Location"
-                                android:textColor="@color/white"
+                                android:textColor="#50469C"
                                 android:textSize="10sp"
                                 android:textStyle="bold"
                                 android:gravity="center"
@@ -293,28 +302,28 @@
                         android:layout_weight="1"
                         android:layout_marginStart="8dp"
                         app:cardCornerRadius="15dp"
-                        app:cardElevation="6dp"
-                        app:cardBackgroundColor="#9B59B6">
+                        app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="10dp">
+                            android:padding="10dp"
+                            android:background="@drawable/card_gradient_4">
 
                             <ImageView
                                 android:layout_width="36dp"
                                 android:layout_height="36dp"
                                 android:src="@drawable/emergency_share_24"
-                                app:tint="@color/white"
+                                app:tint="#5245A1"
                                 android:layout_marginBottom="6dp"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Emergency Info"
-                                android:textColor="@color/white"
+                                android:textColor="#50469C"
                                 android:textSize="10sp"
                                 android:textStyle="bold"
                                 android:gravity="center"
@@ -338,28 +347,28 @@
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
                         app:cardCornerRadius="15dp"
-                        app:cardElevation="6dp"
-                        app:cardBackgroundColor="#27AE60">
+                        app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="10dp">
+                            android:padding="10dp"
+                            android:background="@drawable/card_gradient_5">
 
                             <ImageView
                                 android:layout_width="36dp"
                                 android:layout_height="36dp"
                                 android:src="@drawable/safety_24"
-                                app:tint="@color/white"
+                                app:tint="#5245A1"
                                 android:layout_marginBottom="6dp"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Safe Zone"
-                                android:textColor="@color/white"
+                                android:textColor="#50469C"
                                 android:textSize="10sp"
                                 android:textStyle="bold"
                                 android:gravity="center"
@@ -375,28 +384,28 @@
                         android:layout_weight="1"
                         android:layout_marginStart="8dp"
                         app:cardCornerRadius="15dp"
-                        app:cardElevation="6dp"
-                        app:cardBackgroundColor="#E74C3C">
+                        app:cardElevation="6dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:orientation="vertical"
                             android:gravity="center"
-                            android:padding="10dp">
+                            android:padding="10dp"
+                            android:background="@drawable/card_gradient_6">
 
                             <ImageView
                                 android:layout_width="36dp"
                                 android:layout_height="36dp"
                                 android:src="@drawable/ic_camera"
-                                app:tint="@color/white"
+                                app:tint="#5245A1"
                                 android:layout_marginBottom="6dp"/>
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Video Recording"
-                                android:textColor="@color/white"
+                                android:textColor="#50469C"
                                 android:textSize="10sp"
                                 android:textStyle="bold"
                                 android:gravity="center"
@@ -415,12 +424,13 @@
     android:layout_width="300dp"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:background="@color/white"
+    android:background="#F5F3FA"
     android:fitsSystemWindows="true"
     app:headerLayout="@layout/nav_header"
     app:menu="@menu/drawer_menu"
-    app:itemIconTint="@color/Deep_Navy"
-    app:itemTextColor="@color/Deep_Navy"
+    app:itemIconTint="#5245A1"
+    app:itemTextColor="#50469C"
+    app:itemBackground="@drawable/nav_item_selector"
     app:itemTextAppearance="@style/NavDrawerTextStyle"
     app:itemIconSize="24dp"
     app:itemVerticalPadding="14dp"

@@ -58,8 +58,11 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private View pulseView;
+    private View pulseRing;
     private Animation pulseAnimation;
+    private Animation pulseRedAnimation;
     private PowerButtonReceiver powerButtonReceiver;
+    private boolean isSOSActive = false;
 
     private static final int REQ_NOTIFICATION_PERMISSION = 999;
     private static final int REQ_SMS_PERMISSION = 1001;
@@ -84,8 +87,11 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
         setContentView(R.layout.activity_main);
 
         pulseView = findViewById(R.id.pulse_view);
+        pulseRing = findViewById(R.id.pulse_ring);
+
         FrameLayout startShakeButton = findViewById(R.id.btn_sos);
         pulseAnimation = AnimationUtils.loadAnimation(this, R.anim.pulse);
+        pulseRedAnimation = AnimationUtils.loadAnimation(this, R.anim.pulse_red);
         prefs = getSharedPreferences("AppSettingsPrefs", MODE_PRIVATE);
         locationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -105,6 +111,7 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
 
         // SOS Button click
         startShakeButton.setOnClickListener(v -> {
+            startRedPulsing();
             showSOSMethodDialog();
         });
 
@@ -211,6 +218,22 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
         });
     }
 
+    private void startRedPulsing() {
+        if (!isSOSActive) {
+            isSOSActive = true;
+            pulseView.startAnimation(pulseRedAnimation);
+            pulseRing.startAnimation(pulseRedAnimation);
+        }
+    }
+
+    private void stopRedPulsing() {
+        if (isSOSActive) {
+            isSOSActive = false;
+            pulseView.clearAnimation();
+            pulseRing.clearAnimation();
+        }
+    }
+
     private void showSOSMethodDialog() {
         // Direct SOS - send immediately without countdown
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -221,6 +244,12 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
                 })
                 .setNegativeButton("WhatsApp", (dialog, which) -> {
                     sendSOSImmediately("whatsapp");
+                })
+                .setOnDismissListener(dialog -> {
+                    // Stop pulsing after 5 seconds when dialog is dismissed
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        stopRedPulsing();
+                    }, 5000);
                 })
                 .show();
     }

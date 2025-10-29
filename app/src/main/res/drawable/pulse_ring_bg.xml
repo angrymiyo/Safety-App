@@ -1,7 +1,4 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="oval">
-    <solid android:color="#33FF0000" /> <!-- Light red glow -->
-    <stroke
-        android:width="4dp"
-        android:color="#66FF0000" /> <!-- Softer ring outline -->
+    <solid android:color="#E6C4C4" /> <!-- Light pink outer ring -->
 </shape>
