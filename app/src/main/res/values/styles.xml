@@ -16,9 +16,11 @@
     </style>
 
     <style name="SpinnerTheme" parent="Theme.AppCompat.Light">
-        <item name="android:textColorPrimary">#FFFFFF</item>
-        <item name="android:textColor">#FFFFFF</item>
-        <item name="colorControlNormal">#FFFFFF</item>
+        <item name="android:textColorPrimary">#5245A1</item>
+        <item name="android:textColor">#5245A1</item>
+        <item name="colorControlNormal">#5245A1</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
 </resources>

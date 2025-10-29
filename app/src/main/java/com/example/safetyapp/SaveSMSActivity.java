@@ -76,17 +76,6 @@ public class SaveSMSActivity extends BaseActivity {
         loadEmergencyContacts();
         loadSavedMessage();
 
-        // Spinner setup with black text and white dropdown background
-        String[] countdownOptions = {"5 sec", "10 sec", "30 sec", "Send Immediately"};
-
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(
-                this,
-                R.layout.spinner_item, // selected item black text
-                countdownOptions
-        );
-        spinnerAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item); // dropdown black text + white bg
-        spinnerCountdown.setAdapter(spinnerAdapter);
-
         btnAddContact.setOnClickListener(this::showContactOptionsMenu);
 
         btnSaveMessage.setOnClickListener(v -> {
@@ -98,10 +87,11 @@ public class SaveSMSActivity extends BaseActivity {
 
             int countdownSeconds;
             switch (spinnerCountdown.getSelectedItemPosition()) {
-                case 0: countdownSeconds = 5; break;
-                case 1: countdownSeconds = 10; break;
-                case 2: countdownSeconds = 30; break;
-                default: countdownSeconds = 0; break;
+                case 1: countdownSeconds = 5; break;
+                case 2: countdownSeconds = 10; break;
+                case 3: countdownSeconds = 30; break;
+                case 4: countdownSeconds = 0; break;
+                default: countdownSeconds = 5; break;
             }
 
             DatabaseReference userRef = FirebaseDatabase.getInstance()
