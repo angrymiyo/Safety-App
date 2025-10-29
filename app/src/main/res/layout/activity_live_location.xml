@@ -4,7 +4,7 @@
     android:id="@+id/layout_live_location"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background_live">
+    android:background="@color/white">
 
     <!-- Outer Glow Ring with Animation -->
     <View
@@ -71,7 +71,7 @@
         android:text="Live Location Sharing"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="#FFFFFF"
+        android:textColor="#5245A1"
         android:gravity="center"
         android:fontFamily="sans-serif-medium"
         android:letterSpacing="0.03"
@@ -93,7 +93,7 @@
         android:layout_marginEnd="32dp"
         android:text="Share your real-time location with trusted contacts"
         android:textSize="10sp"
-        android:textColor="#C1E8FF"
+        android:textColor="#5245A1"
         android:gravity="center"
         android:fontFamily="sans-serif"
         android:letterSpacing="0.01"

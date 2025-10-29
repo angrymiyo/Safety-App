@@ -636,7 +636,7 @@
                             android:layout_width="34dp"
                             android:layout_height="34dp"
                             android:src="@drawable/ic_voice_enrollment"
-                            android:tint="#1976D2"
+                            android:tint="#5245A1"
                             android:padding="5dp"
                             android:background="@drawable/circle_white"
                             android:layout_marginEnd="10dp"/>
@@ -652,7 +652,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="Voice Enrollment"
                                 android:textSize="13sp"
-                                android:textColor="#1976D2"
+                                android:textColor="#5245A1"
                                 android:textStyle="bold"
                                 android:layout_marginBottom="2dp"/>
 
@@ -678,7 +678,7 @@
                         app:icon="@drawable/ic_fingerprint"
                         app:iconGravity="textStart"
                         app:iconSize="16dp"
-                        app:backgroundTint="#1976D2"
+                        app:backgroundTint="#5245A1"
                         android:textColor="@android:color/white"
                         android:elevation="3dp"/>
                 </LinearLayout>

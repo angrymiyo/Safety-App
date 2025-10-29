@@ -47,7 +47,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:text="Add Emergency Contact"
-                android:textColor="#5245A1"
+                android:textColor="@android:color/white"
                 android:textSize="15sp"
                 android:textStyle="bold"
                 android:textAllCaps="false"
@@ -57,8 +57,8 @@
                 app:iconGravity="textStart"
                 app:iconPadding="12dp"
                 app:iconSize="22dp"
-                app:iconTint="#5245A1"
-                android:backgroundTint="#FFFFFF"
+                app:iconTint="@android:color/white"
+                android:backgroundTint="#5245A1"
                 app:cornerRadius="16dp"
                 android:elevation="3dp" />
 
