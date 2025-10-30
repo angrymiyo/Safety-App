@@ -99,6 +99,9 @@
         <activity android:name=".SignupActivity" />
         <activity android:name=".LoginActivity" />
         <activity
+            android:name=".ResetPasswordActivity"
+            android:parentActivityName=".LoginActivity" />
+        <activity
             android:name=".SafeZoneActivity"
             android:label="SafeZoneActivity"
             android:parentActivityName=".MainActivity" />
