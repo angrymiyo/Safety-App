@@ -297,37 +297,6 @@
 
         </androidx.cardview.widget.CardView>
 
-        <!-- Info Section -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginBottom="16dp"
-            android:padding="12dp"
-            android:background="@drawable/rounded_bg_light"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_info"
-                app:tint="@color/Deep_Navy"
-                android:layout_marginEnd="10dp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Your emergency contacts will receive your location and status message"
-                android:textColor="@color/Deep_Navy"
-                android:textSize="12sp"
-                android:lineSpacingExtra="1dp" />
-
-        </LinearLayout>
-
     </LinearLayout>
 
 </ScrollView>

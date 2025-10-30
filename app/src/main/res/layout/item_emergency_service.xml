@@ -21,7 +21,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:contentDescription="Icon"
-            app:tint="#7C3AED" />
+            app:tint="#5245A1" />
 
         <TextView
             android:id="@+id/tv_service_name"
@@ -43,7 +43,7 @@
             android:text="999"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#7C3AED"
+            android:textColor="#5245A1"
             android:layout_marginTop="4dp" />
 
         <Button
@@ -53,7 +53,7 @@
             android:text="Call Now"
             android:textSize="12sp"
             android:textAllCaps="false"
-            android:backgroundTint="#7C3AED"
+            android:backgroundTint="@color/accent_red"
             android:textColor="@android:color/white"
             android:paddingHorizontal="16dp"
             android:layout_marginTop="6dp" />

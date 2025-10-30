@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/gradient_background_emergency"
+    android:background="@drawable/bg_gradient"
     android:padding="16dp">
 
     <TextView
@@ -13,7 +13,7 @@
         android:text="🚨 Emergency Services"
         android:textSize="22sp"
         android:textColor="@android:color/white"
-        android:paddingTop="8dp"
+        android:paddingTop="4dp"
         android:paddingBottom="4dp"
         android:textStyle="bold"
         android:fontFamily="sans-serif-medium"
@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:text="Select a service to call immediately"
         android:textSize="14sp"
-        android:textColor="#E9D5FF"
+        android:textColor="#5245A1"
         android:paddingBottom="12dp"
         android:alpha="0.95" />
 
