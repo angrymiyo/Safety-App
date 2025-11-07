@@ -81,17 +81,18 @@
 
         if (!shareId) {
             document.body.innerHTML = '<div style="padding:20px;text-align:center;"><h2>Invalid tracking link</h2><p>Please check your link and try again.</p></div>';
+            throw new Error('No shareId provided');
         }
 
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBXMle6N0g3OElWcXCgdmr0Mh86U88Qv0A",
-            authDomain: "safetyapp-c0222.firebaseapp.com",
-            databaseURL: "https://safetyapp-c0222-default-rtdb.firebaseio.com",
-            projectId: "safetyapp-c0222",
-            storageBucket: "safetyapp-c0222.firebasestorage.app",
-            messagingSenderId: "569890418673",
-            appId: "1:569890418673:web:3a0fe5ece5a12e2cf29929"
+            apiKey: "AIzaSyAu_zOKuB4-pU_iRFEjpHeNLLQMMmz6K30",
+            authDomain: "safetyapp-2042f.firebaseapp.com",
+            databaseURL: "https://safetyapp-2042f-default-rtdb.firebaseio.com",
+            projectId: "safetyapp-2042f",
+            storageBucket: "safetyapp-2042f.firebasestorage.app",
+            messagingSenderId: "551439184857",
+            appId: "1:551439184857:android:46ee289047761b1d895fc8"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -137,11 +138,25 @@
 
         // Listen for location updates from Firebase
         const locationRef = database.ref('LiveLocations/' + shareId + '/currentLocation');
+        let hasReceivedLocation = false;
+        let connectionTimeout;
+
+        // Set a timeout to show error if no location received within 30 seconds
+        connectionTimeout = setTimeout(() => {
+            if (!hasReceivedLocation) {
+                document.getElementById('lastUpdate').textContent =
+                    'Waiting for location data... Please ensure location sharing is active on the device.';
+                document.getElementById('lastUpdate').style.color = '#f59e0b';
+            }
+        }, 30000);
 
         locationRef.on('value', (snapshot) => {
             const data = snapshot.val();
 
             if (data && data.latitude && data.longitude) {
+                hasReceivedLocation = true;
+                clearTimeout(connectionTimeout);
+
                 const lat = data.latitude;
                 const lng = data.longitude;
                 const timestamp = data.timestamp;
@@ -164,26 +179,50 @@
                 // Center map on current location
                 map.panTo(newLatLng);
 
-                // Update timestamp
+                // Update timestamp with normal color
                 const date = new Date(timestamp);
                 document.getElementById('lastUpdate').textContent =
                     'Updated: ' + date.toLocaleTimeString();
+                document.getElementById('lastUpdate').style.color = '#6b7280';
             }
         });
 
-        // Check if tracking is still active
-        const sessionRef = database.ref('LiveLocations/' + shareId + '/isActive');
-        sessionRef.on('value', (snapshot) => {
+        // Check if tracking session exists and is active
+        const sessionRef = database.ref('LiveLocations/' + shareId);
+        let sessionCheckTimeout;
+
+        // Check if session exists within 10 seconds
+        sessionCheckTimeout = setTimeout(() => {
+            if (!hasReceivedLocation) {
+                sessionRef.once('value', (snapshot) => {
+                    if (!snapshot.exists()) {
+                        document.getElementById('lastUpdate').textContent =
+                            'Tracking session not found. The link may be invalid or expired.';
+                        document.getElementById('lastUpdate').style.color = '#ef4444';
+                        document.getElementById('status').innerHTML = '<span style="color:#ef4444">⚫ Session Not Found</span>';
+                        document.getElementById('status').className = 'status-ended';
+                    }
+                });
+            }
+        }, 10000);
+
+        sessionRef.child('isActive').on('value', (snapshot) => {
             if (snapshot.val() === false) {
+                clearTimeout(connectionTimeout);
+                clearTimeout(sessionCheckTimeout);
                 document.getElementById('status').innerHTML = '<span style="color:#6b7280">⚫ Tracking Ended</span>';
                 document.getElementById('status').className = 'status-ended';
+                document.getElementById('lastUpdate').textContent = 'Location sharing has ended';
+            } else if (snapshot.val() === true && hasReceivedLocation) {
+                clearTimeout(sessionCheckTimeout);
             }
         });
 
         // Handle connection errors
         locationRef.on('error', (error) => {
             console.error('Firebase error:', error);
-            document.getElementById('lastUpdate').textContent = 'Connection error';
+            document.getElementById('lastUpdate').textContent = 'Connection error. Please check your internet connection.';
+            document.getElementById('lastUpdate').style.color = '#ef4444';
         });
     </script>
 </body>

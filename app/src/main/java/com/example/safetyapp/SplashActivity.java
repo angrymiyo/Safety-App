@@ -19,6 +19,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.example.safetyapp.helper.LocationServiceChecker;
+
 import java.util.ArrayList;
 
 public class SplashActivity extends AppCompatActivity {
@@ -166,13 +168,22 @@ public class SplashActivity extends AppCompatActivity {
                         intent.setData(Uri.parse("package:" + packageName));
                         startActivityForResult(intent, BATTERY_OPTIMIZATION_REQUEST_CODE);
                     })
-                    .setNegativeButton("Skip", (dialog, which) -> proceedToMainActivity())
+                    .setNegativeButton("Skip", (dialog, which) -> checkLocationService())
                     .setCancelable(false)
                     .show();
                 return;
             }
         }
-        proceedToMainActivity();
+        checkLocationService();
+    }
+
+    private void checkLocationService() {
+        // Check if location services are enabled
+        if (!LocationServiceChecker.isLocationServiceEnabled(this)) {
+            LocationServiceChecker.showLocationServiceDialog(this, this::proceedToMainActivity);
+        } else {
+            proceedToMainActivity();
+        }
     }
 
     @Override
@@ -182,8 +193,15 @@ public class SplashActivity extends AppCompatActivity {
         if (requestCode == OVERLAY_PERMISSION_REQUEST_CODE) {
             checkBatteryOptimization();
         } else if (requestCode == BATTERY_OPTIMIZATION_REQUEST_CODE) {
-            proceedToMainActivity();
+            checkLocationService();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Recheck location service when user returns from settings
+        // This ensures the check happens after user enables location from settings
     }
 
     private void showPermissionDeniedDialog() {

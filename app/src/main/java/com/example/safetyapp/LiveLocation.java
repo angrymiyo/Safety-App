@@ -18,6 +18,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.safetyapp.helper.EmergencyMessageHelper;
+import com.example.safetyapp.helper.LocationServiceChecker;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -97,7 +98,17 @@ public class LiveLocation extends BaseActivity {
         cleanupOldSessions(); // Auto-cleanup old tracking sessions
 
         btnShare.setOnClickListener(v -> {
-            showShareMethodDialog();
+            // Check location service before starting to share
+            if (!LocationServiceChecker.isLocationServiceEnabled(this)) {
+                LocationServiceChecker.showLocationServiceDialog(this, () -> {
+                    // After enabling, check again
+                    if (LocationServiceChecker.isLocationServiceEnabled(this)) {
+                        showShareMethodDialog();
+                    }
+                });
+            } else {
+                showShareMethodDialog();
+            }
         });
 
         btnStopSharing.setOnClickListener(v -> stopLiveLocationSharing());

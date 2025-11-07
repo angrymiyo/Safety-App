@@ -39,6 +39,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 
 import com.example.safetyapp.helper.EmergencyMessageHelper;
+import com.example.safetyapp.helper.LocationServiceChecker;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
@@ -369,6 +370,10 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Check if location service is enabled when app resumes
+        checkLocationServiceStatus();
+
         // Background service handles all shake detection
         // No in-app shake detection needed
 
@@ -427,6 +432,21 @@ public class MainActivity extends BaseActivity implements ShakeDetector.OnShakeL
             unregisterReceiver(powerButtonReceiver);
         }
         // Background service continues running
+    }
+
+    private void checkLocationServiceStatus() {
+        // Check if location service is enabled
+        if (!LocationServiceChecker.isLocationServiceEnabled(this)) {
+            // Show a non-intrusive toast first
+            Toast.makeText(this, "Location service is disabled. Some features may not work.", Toast.LENGTH_SHORT).show();
+
+            // Optionally show dialog after a delay to not interrupt user flow
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (!LocationServiceChecker.isLocationServiceEnabled(this)) {
+                    LocationServiceChecker.showLocationServiceDialog(this);
+                }
+            }, 2000);
+        }
     }
 
     private void requestNotificationPermission() {
