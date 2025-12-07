@@ -34,6 +34,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleService;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.example.safetyapp.helper.VideoUploadHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -52,6 +53,7 @@ public class VideoRecordingService extends LifecycleService {
     private Uri savedVideoUri;
     private long recordingStartTime = 0;
     private PowerManager.WakeLock wakeLock;
+    private boolean isUploading = false;
 
     @Override
     public void onCreate() {
@@ -64,9 +66,10 @@ public class VideoRecordingService extends LifecycleService {
         createNotificationChannel();
 
         // Acquire wake lock to keep service running even when screen is off
+        // Extended to 5 minutes to allow for video upload after recording
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SafetyApp::VideoRecording");
-        wakeLock.acquire(70000); // Hold for 70 seconds (slightly more than 60s recording)
+        wakeLock.acquire(300000); // Hold for 5 minutes (60s recording + upload time)
         android.util.Log.i(TAG, "✅ Wake lock acquired - service will stay active");
     }
 
@@ -214,12 +217,103 @@ public class VideoRecordingService extends LifecycleService {
                 // Notify user
                 showCompletionNotification(savedVideoUri);
 
+                // Upload video to Firebase Storage and send link to emergency contacts
+                uploadVideoToCloud(savedVideoUri);
+
             } else {
                 android.util.Log.e(TAG, "❌ Recording error: " + finalizeEvent.getError());
             }
 
-            // Stop service after recording completes
-            handler.postDelayed(this::stopSelf, 2000);
+            // Service will stop after upload completes (handled in uploadVideoToCloud)
+        }
+    }
+
+    private void uploadVideoToCloud(Uri videoUri) {
+        android.util.Log.i(TAG, "========================================");
+        android.util.Log.i(TAG, "☁️ Starting video upload to Firebase Storage");
+
+        isUploading = true;
+
+        VideoUploadHelper uploadHelper = new VideoUploadHelper(this);
+        uploadHelper.uploadVideoAndSendLink(videoUri, new VideoUploadHelper.UploadCallback() {
+            @Override
+            public void onSuccess(String downloadUrl) {
+                android.util.Log.i(TAG, "✅ Video uploaded successfully!");
+                android.util.Log.i(TAG, "📎 Download URL: " + downloadUrl);
+                showUploadCompleteNotification(downloadUrl);
+                isUploading = false;
+                // Stop service after successful upload
+                handler.postDelayed(() -> stopSelf(), 2000);
+            }
+
+            @Override
+            public void onFailure(String error) {
+                android.util.Log.e(TAG, "❌ Video upload failed: " + error);
+                showUploadFailedNotification(error);
+                isUploading = false;
+                // Stop service even if upload fails (video is saved locally)
+                handler.postDelayed(() -> stopSelf(), 2000);
+            }
+
+            @Override
+            public void onProgress(int progress) {
+                android.util.Log.i(TAG, "📤 Upload progress: " + progress + "%");
+                updateUploadNotification(progress);
+            }
+        });
+
+        android.util.Log.i(TAG, "========================================");
+    }
+
+    private void updateUploadNotification(int progress) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("📤 Uploading Video Evidence")
+                .setContentText("Uploading to cloud... " + progress + "%")
+                .setSmallIcon(R.drawable.ic_camera)
+                .setProgress(100, progress, false)
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setSilent(true);
+
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (manager != null) {
+            manager.notify(NOTIFICATION_ID + 2, builder.build());
+        }
+    }
+
+    private void showUploadCompleteNotification(String downloadUrl) {
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (manager != null) {
+            manager.cancel(NOTIFICATION_ID + 2); // Cancel progress notification
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("✅ Video Shared Successfully")
+                .setContentText("Video link sent to emergency contacts")
+                .setSmallIcon(R.drawable.ic_camera)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        if (manager != null) {
+            manager.notify(NOTIFICATION_ID + 3, builder.build());
+        }
+    }
+
+    private void showUploadFailedNotification(String error) {
+        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (manager != null) {
+            manager.cancel(NOTIFICATION_ID + 2); // Cancel progress notification
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("⚠️ Video Upload Failed")
+                .setContentText("Video saved locally. Upload failed: " + error)
+                .setSmallIcon(R.drawable.ic_camera)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        if (manager != null) {
+            manager.notify(NOTIFICATION_ID + 3, builder.build());
         }
     }
 
