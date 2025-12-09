@@ -60,31 +60,39 @@ public class VideoUploadHelper {
     }
 
     public void uploadVideoAndSendLink(Uri videoUri, UploadCallback callback) {
-        Log.i(TAG, "Starting upload to GoFile (FREE - no account needed)");
+        Log.i(TAG, "Starting video upload (FREE cloud storage)");
 
         executor.execute(() -> {
             try {
-                // Step 1: Get best server from GoFile
+                String downloadUrl = null;
+
+                // Try GoFile first
+                Log.i(TAG, "Trying GoFile.io...");
                 String server = getGoFileServer();
-                if (server == null) {
-                    mainHandler.post(() -> callback.onFailure("Failed to get upload server"));
-                    return;
+                if (server != null) {
+                    downloadUrl = uploadToGoFile(server, videoUri, callback);
                 }
 
-                Log.i(TAG, "Using GoFile server: " + server);
+                // If GoFile fails, try Catbox
+                if (downloadUrl == null) {
+                    Log.w(TAG, "GoFile failed, trying Catbox.moe...");
+                    downloadUrl = uploadToCatbox(videoUri, callback);
+                }
 
-                // Step 2: Upload the video
-                String downloadUrl = uploadToGoFile(server, videoUri, callback);
+                // If Catbox fails, try file.io
+                if (downloadUrl == null) {
+                    Log.w(TAG, "Catbox failed, trying file.io...");
+                    downloadUrl = uploadToFileIO(videoUri, callback);
+                }
 
+                // Final result
                 if (downloadUrl != null) {
                     Log.i(TAG, "Upload successful! URL: " + downloadUrl);
-
-                    // Send SMS with video link to emergency contacts
                     sendVideoLinkToContacts(downloadUrl);
-
-                    mainHandler.post(() -> callback.onSuccess(downloadUrl));
+                    final String finalUrl = downloadUrl;
+                    mainHandler.post(() -> callback.onSuccess(finalUrl));
                 } else {
-                    mainHandler.post(() -> callback.onFailure("Upload failed"));
+                    mainHandler.post(() -> callback.onFailure("Upload failed to all servers"));
                 }
 
             } catch (Exception e) {
@@ -111,15 +119,23 @@ public class VideoUploadHelper {
                 }
                 reader.close();
 
+                Log.i(TAG, "GoFile servers response: " + response.toString());
+
                 JSONObject json = new JSONObject(response.toString());
-                if ("ok".equals(json.getString("status"))) {
-                    JSONObject data = json.getJSONObject("data");
-                    // Get first available server
+                JSONObject data = json.getJSONObject("data");
+
+                // First try "servers" array
+                if (data.has("servers") && data.getJSONArray("servers").length() > 0) {
                     return data.getJSONArray("servers").getJSONObject(0).getString("name");
+                }
+
+                // Fallback to "serversAllZone" array
+                if (data.has("serversAllZone") && data.getJSONArray("serversAllZone").length() > 0) {
+                    return data.getJSONArray("serversAllZone").getJSONObject(0).getString("name");
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "Failed to get server: " + e.getMessage());
+            Log.e(TAG, "Failed to get GoFile server: " + e.getMessage());
         }
         return null;
     }
@@ -130,16 +146,17 @@ public class VideoUploadHelper {
             String boundary = "----WebKitFormBoundary" + System.currentTimeMillis();
             URL url = new URL("https://" + server + ".gofile.io/contents/uploadfile");
 
+            Log.i(TAG, "Uploading to GoFile server: " + server);
+
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
             conn.setDoInput(true);
             conn.setUseCaches(false);
             conn.setConnectTimeout(60000);
-            conn.setReadTimeout(120000);
+            conn.setReadTimeout(300000);
             conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
-            // Get file info
             String fileName = getFileName(videoUri);
             long fileSize = getFileSize(videoUri);
 
@@ -150,6 +167,96 @@ public class VideoUploadHelper {
             // Write file part
             outputStream.writeBytes("--" + boundary + "\r\n");
             outputStream.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"" + fileName + "\"\r\n");
+            outputStream.writeBytes("Content-Type: video/mp4\r\n\r\n");
+
+            InputStream inputStream = context.getContentResolver().openInputStream(videoUri);
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            long totalBytesRead = 0;
+            int lastProgress = 0;
+
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+                totalBytesRead += bytesRead;
+
+                int progress = (int) ((totalBytesRead * 100) / fileSize);
+                if (progress != lastProgress && progress % 5 == 0) {
+                    lastProgress = progress;
+                    final int p = progress;
+                    mainHandler.post(() -> callback.onProgress(p));
+                }
+            }
+            inputStream.close();
+
+            outputStream.writeBytes("\r\n--" + boundary + "--\r\n");
+            outputStream.flush();
+            outputStream.close();
+
+            int responseCode = conn.getResponseCode();
+            Log.i(TAG, "GoFile response code: " + responseCode);
+
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+
+                Log.i(TAG, "GoFile response: " + response.toString());
+
+                JSONObject json = new JSONObject(response.toString());
+                if ("ok".equals(json.getString("status"))) {
+                    JSONObject data = json.getJSONObject("data");
+                    return data.getString("downloadPage");
+                }
+            } else {
+                Log.e(TAG, "GoFile error response code: " + responseCode);
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "GoFile upload failed: " + e.getMessage());
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+        return null;
+    }
+
+    private String uploadToCatbox(Uri videoUri, UploadCallback callback) {
+        HttpURLConnection conn = null;
+        try {
+            String boundary = "----WebKitFormBoundary" + System.currentTimeMillis();
+            URL url = new URL("https://catbox.moe/user/api.php");
+
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setUseCaches(false);
+            conn.setConnectTimeout(60000);
+            conn.setReadTimeout(300000); // 5 min timeout for large files
+            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+            conn.setRequestProperty("User-Agent", "SafetyApp/1.0");
+
+            // Get file info
+            String fileName = getFileName(videoUri);
+            long fileSize = getFileSize(videoUri);
+
+            Log.i(TAG, "Uploading to Catbox: " + fileName + " (" + (fileSize / 1024 / 1024) + " MB)");
+
+            DataOutputStream outputStream = new DataOutputStream(conn.getOutputStream());
+
+            // Write reqtype field
+            outputStream.writeBytes("--" + boundary + "\r\n");
+            outputStream.writeBytes("Content-Disposition: form-data; name=\"reqtype\"\r\n\r\n");
+            outputStream.writeBytes("fileupload\r\n");
+
+            // Write file part
+            outputStream.writeBytes("--" + boundary + "\r\n");
+            outputStream.writeBytes("Content-Disposition: form-data; name=\"fileToUpload\"; filename=\"" + fileName + "\"\r\n");
             outputStream.writeBytes("Content-Type: video/mp4\r\n\r\n");
 
             // Write file content with progress tracking
@@ -178,7 +285,7 @@ public class VideoUploadHelper {
 
             // Read response
             int responseCode = conn.getResponseCode();
-            Log.i(TAG, "Response code: " + responseCode);
+            Log.i(TAG, "Catbox response code: " + responseCode);
 
             if (responseCode == 200) {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -189,12 +296,12 @@ public class VideoUploadHelper {
                 }
                 reader.close();
 
-                Log.i(TAG, "Response: " + response.toString());
+                String result = response.toString().trim();
+                Log.i(TAG, "Catbox response: " + result);
 
-                JSONObject json = new JSONObject(response.toString());
-                if ("ok".equals(json.getString("status"))) {
-                    JSONObject data = json.getJSONObject("data");
-                    return data.getString("downloadPage");
+                // Catbox returns direct URL on success
+                if (result.startsWith("https://")) {
+                    return result;
                 }
             } else {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
@@ -204,12 +311,87 @@ public class VideoUploadHelper {
                     error.append(line);
                 }
                 reader.close();
-                Log.e(TAG, "Error response: " + error.toString());
+                Log.e(TAG, "Catbox error: " + error.toString());
             }
 
         } catch (Exception e) {
-            Log.e(TAG, "Upload failed: " + e.getMessage());
+            Log.e(TAG, "Catbox upload failed: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+        return null;
+    }
+
+    private String uploadToFileIO(Uri videoUri, UploadCallback callback) {
+        HttpURLConnection conn = null;
+        try {
+            String boundary = "----WebKitFormBoundary" + System.currentTimeMillis();
+            URL url = new URL("https://file.io");
+
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.setUseCaches(false);
+            conn.setConnectTimeout(60000);
+            conn.setReadTimeout(300000);
+            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+
+            String fileName = getFileName(videoUri);
+            long fileSize = getFileSize(videoUri);
+
+            Log.i(TAG, "Uploading to file.io: " + fileName);
+
+            DataOutputStream outputStream = new DataOutputStream(conn.getOutputStream());
+
+            // Write file part
+            outputStream.writeBytes("--" + boundary + "\r\n");
+            outputStream.writeBytes("Content-Disposition: form-data; name=\"file\"; filename=\"" + fileName + "\"\r\n");
+            outputStream.writeBytes("Content-Type: video/mp4\r\n\r\n");
+
+            InputStream inputStream = context.getContentResolver().openInputStream(videoUri);
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            long totalBytesRead = 0;
+
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+                totalBytesRead += bytesRead;
+                int progress = (int) ((totalBytesRead * 100) / fileSize);
+                final int p = progress;
+                mainHandler.post(() -> callback.onProgress(p));
+            }
+            inputStream.close();
+
+            outputStream.writeBytes("\r\n--" + boundary + "--\r\n");
+            outputStream.flush();
+            outputStream.close();
+
+            int responseCode = conn.getResponseCode();
+            Log.i(TAG, "file.io response code: " + responseCode);
+
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+
+                Log.i(TAG, "file.io response: " + response.toString());
+
+                JSONObject json = new JSONObject(response.toString());
+                if (json.getBoolean("success")) {
+                    return json.getString("link");
+                }
+            }
+
+        } catch (Exception e) {
+            Log.e(TAG, "file.io upload failed: " + e.getMessage());
         } finally {
             if (conn != null) {
                 conn.disconnect();
