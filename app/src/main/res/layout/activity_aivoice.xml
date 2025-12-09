@@ -399,12 +399,13 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Bangla Keywords Card (Expandable) - REDUCED -->
+            <!-- Bangla Keywords Card (Expandable) - HIDDEN -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/card_bangla_keywords"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
+                android:visibility="gone"
                 app:cardCornerRadius="14dp"
                 app:cardElevation="4dp"
                 app:cardBackgroundColor="#FFFFFF">
